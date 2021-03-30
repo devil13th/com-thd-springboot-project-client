@@ -37,7 +37,7 @@ class NoteList extends React.Component {
     tableLoading: false,
     tableData: [],
     pagination: {
-      current: 1,
+      pageNum: 1,
       pageSize: 10,
       pageSizeOptions: [5, 10, 15, 50, 100],
       showTotal: (total, range) => {
@@ -116,7 +116,7 @@ class NoteList extends React.Component {
             showSizeChanger: true,
             showQuickJumper: true,
             ...this.state.pagination,
-            current: 1,
+            pageNum: 1,
           },
         },
         this.basicQuery
@@ -130,7 +130,7 @@ class NoteList extends React.Component {
   basicQuery = () => {
     const _this = this;
     const queryCondition = {
-      current: this.state.pagination.current,
+      pageNum: this.state.pagination.pageNum,
       pageSize: this.state.pagination.pageSize,
       total: this.state.pagination.total,
       sortField: this.state.sorter.field,
@@ -153,12 +153,40 @@ class NoteList extends React.Component {
           },
           showSizeChanger: true,
           showQuickJumper: true,
-          current: r.result.pageNum,
+          pageNum: r.result.pageNum,
           pageSize: r.result.pageSize,
           total: r.result.total,
         },
       });
     });
+  };
+
+  // 分页/排序 事件处理
+  handleTableChange = (pagination, filters, sorter) => {
+    const st = {
+      pagination: {
+        showTotal: (total, range) => {
+          return `${total} items`;
+        },
+        showSizeChanger: true,
+        showQuickJumper: true,
+        pageNum: pagination.current,
+        pageSize: pagination.pageSize,
+        total: this.state.pagination.total,
+      },
+    };
+    if (sorter.field && sorter.order) {
+      st.sorter = {
+        field: sorter.field,
+        order: sorter.order,
+      };
+    } else {
+      st.sorter = {
+        field: "",
+        order: "",
+      };
+    }
+    this.setState(st, this.queryList);
   };
 
   render() {
@@ -228,6 +256,7 @@ class NoteList extends React.Component {
     const dataList =
       this.state.mode === "LIST" ? (
         <Table
+          onChange={this.handleTableChange}
           style={{ marginTop: "4px" }}
           size={"small"}
           dataSource={this.state.tableData}
