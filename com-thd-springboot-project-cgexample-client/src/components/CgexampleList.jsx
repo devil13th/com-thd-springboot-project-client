@@ -6,10 +6,14 @@ import {
   Button,
   Input,
   Dropdown,
+  Space,
   Tooltip,
   message,
+  Divider,
   Pagination,
   Popconfirm,
+  Row,
+  Col,
   Card,
 } from "antd";
 import CgexampleApi from "@/api/CgexampleApi";
@@ -20,17 +24,19 @@ import {
   UserOutlined,
   EyeOutlined,
   CloseCircleFilled,
+  TableOutlined,
   CloseOutlined,
+  UnorderedListOutlined,
   DeleteOutlined,
   DownOutlined,
   PlusOutlined,
   MoreOutlined,
-  
 } from "@ant-design/icons";
 
 const { Search } = Input;
 class CgexampleList extends React.Component {
   state = {
+    viewType: "LIST",
     // 查询条件
     cgExampleQueryCondition: {},
     // loading状态
@@ -224,24 +230,27 @@ class CgexampleList extends React.Component {
   };
 
   keyWordsChange = (e) => {
-   this.setState({
-      cgExampleQueryCondition:{...this.state.cgExampleQueryCondition,keyWords:e.target.value}
-    })
-  }
+    this.setState({
+      cgExampleQueryCondition: {
+        ...this.state.cgExampleQueryCondition,
+        keyWords: e.target.value,
+      },
+    });
+  };
 
   clearKeyWords = () => {
     this.setState(
       {
         cgExampleQueryCondition: {
           ...this.state.cgExampleQueryCondition,
-          keyWords:'',
+          keyWords: "",
         },
       },
       () => {
         this.queryCgExampleTabData(true);
       }
     );
-  }
+  };
 
   addCgExample = () => {
     CgexampleApi.addCgExample({
@@ -256,7 +265,7 @@ class CgexampleList extends React.Component {
     CgexampleApi.logicDeleteCgExample(cgExampleId)
       .then((r) => {
         message.info("SUCCESS");
-        this.queryCgExampleTabData()
+        this.queryCgExampleTabData();
       })
       .catch((r) => {
         message.info("FAILURE");
@@ -293,8 +302,17 @@ class CgexampleList extends React.Component {
       cgExampleViewModalVisible: true,
     });
   };
-  
-
+  toggleViewType = () => {
+    if (this.state.viewType === "LIST") {
+      this.setState({
+        viewType: "ITEM",
+      });
+    } else {
+      this.setState({
+        viewType: "LIST",
+      });
+    }
+  };
   render() {
     // 表格字段
     const cgExampleTabDataColumns = [
@@ -328,78 +346,124 @@ class CgexampleList extends React.Component {
       },
     ];
 
-    return (
-      <div>
-        <div className="tabTool">
-          <Search
-            placeholder="Key Word"
-            style={{ width: 200, marginRight: 8 }}
-            onSearch={this.onSearch}
-            onChange={this.keyWordsChange}
-            suffix={<CloseCircleFilled onClick={this.clearKeyWords} style={{cursor:'pointer',fontSize: 12,color: '#aaa'}}/>}
-            value={this.state.cgExampleQueryCondition.keyWords}
-            enterButton
-          />
-
-          <Tooltip title="Create">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                this.openCgexampleFormModal();
-              }}
-            ></Button>
-          </Tooltip>
-        </div>
+    const dataView =
+      this.state.viewType === "LIST" ? (
         <Table
           loading={this.state.cgExampleTabLoading}
-          rowKey={(record) => record.userId}
+          rowKey={(record) => record.id}
           size={"small"}
           columns={cgExampleTabDataColumns}
           dataSource={this.state.cgExampleTabData}
           pagination={this.state.cgExampleTabPagination}
           onChange={this.cgExampleTabChange}
         />
+      ) : (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent: "space-around",
+              background:"#eee",
+              padding:4
+            }}
+          >
+            {this.state.cgExampleTabData.map((item) => {
+              return (
+                <div
+                  className="block"
+                  style={{ flex: "0 0 300px", marginTop: 8 }}
+                  key={item.id}
+                >
+                  <div className="title">{item.userName}</div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "space-around",
-          }}
-        >
-          {this.state.cgExampleTabData.map((item) => {
-            return (
-              <div
-                className="block"
-                style={{ flex: "0 0 300px", marginTop: 8 }}
-                key={item.userId}
-              >
-                <div className="title">{item.userName}</div>
+                  <dl className="profile">
+                    <dt>Age</dt>
+                    <dd>{item.userAge}</dd>
+                  </dl>
 
-                <dl class="profile">
-                  <dt>Age</dt>
-                  <dd>{item.userAge}</dd>
-                </dl>
+                  <dl className="profile">
+                    <dt>Birthday</dt>
+                    <dd> {DateUtils.formatToDate(item.userBirthday)}</dd>
+                  </dl>
 
-                <dl class="profile">
-                  <dt>Birthday</dt>
-                  <dd> {DateUtils.formatToDate(item.userBirthday)}</dd>
-                </dl>
-
-                <div class="divider"></div>
-                <div style={{ textAlign: "right" }}>
-                  {this.createOperate(item)}
+                  <div className="divider"></div>
+                  <div style={{ textAlign: "right" }}>
+                    {this.createOperate(item)}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          <div style={{textAlign:'right'}}>
+          <Pagination
+            style={{marginTop:8}}
+            {...this.state.cgExampleTabPagination}
+            onChange={this.cgExampleTabPaginationChange}
+          />
+          </div>
         </div>
-        <Pagination
-          {...this.state.cgExampleTabPagination}
-          onChange={this.cgExampleTabPaginationChange}
-        />
+      );
+
+    return (
+      <div >
+        <Row gutter={24}>
+          <Col span={12}>
+            {this.state.viewType === "ITEM" ? (
+              <div style={{paddingTop:4}}>
+                <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
+                <Divider type="vertical" />
+                <UnorderedListOutlined
+                  onClick={this.toggleViewType}
+                  style={{ fontSize: 12 }}
+                />
+              </div>
+            ) : (
+              <div style={{paddingTop:4}}>
+                <TableOutlined
+                  onClick={this.toggleViewType}
+                  style={{ fontSize: 12 }}
+                />
+                <Divider type="vertical" />
+                <UnorderedListOutlined
+                  style={{ fontSize: 16, color: "#1890ff" }}
+                />
+              </div>
+            )}
+          </Col>
+          <Col span={12}>
+            <div className="tabTool">
+              <Search
+                placeholder="Key Word"
+                style={{ width: 200, marginRight: 8 }}
+                onSearch={this.onSearch}
+                onChange={this.keyWordsChange}
+                suffix={
+                  <CloseCircleFilled
+                    onClick={this.clearKeyWords}
+                    style={{ cursor: "pointer", fontSize: 12, color: "#aaa" }}
+                  />
+                }
+                value={this.state.cgExampleQueryCondition.keyWords}
+                enterButton
+              />
+
+              <Tooltip title="Create">
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    this.openCgexampleFormModal();
+                  }}
+                ></Button>
+              </Tooltip>
+            </div>
+          </Col>
+        </Row>
+
+        {dataView}
 
         <Modal
           title="Cg Example Info"

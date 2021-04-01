@@ -46,10 +46,10 @@ class IndexLayout extends React.Component {
           </Menu>
         </Sider>
         <Layout className="site-layout">
-          <Content style={{ margin: "16px 16px 0px" }}>
+          <Content style={{ margin: "8px 8px 0px" }}>
             <div
               className="site-layout-background"
-              style={{ padding: "8px 24px", minHeight: 360 }}
+              style={{ padding: "8px 8px", minHeight: 360,background:'#fff' }}
             >
               <Route
                 path="/cgexampleList"
