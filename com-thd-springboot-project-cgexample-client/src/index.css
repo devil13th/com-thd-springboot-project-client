@@ -97,6 +97,7 @@ code {
 dl.form_col{
   display:flex;
   flex-direction: column;
+  margin-bottom:8px;
 }
 
 dl.form_col dt{

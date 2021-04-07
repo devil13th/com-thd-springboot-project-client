@@ -16,6 +16,7 @@ class CgexampleView extends React.Component {
         xl:4,
         xxl:3
     }
+   
   };
 
   static propTypes = {

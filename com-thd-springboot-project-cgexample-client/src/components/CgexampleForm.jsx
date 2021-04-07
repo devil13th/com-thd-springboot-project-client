@@ -17,15 +17,24 @@ import moment from "moment";
 class CgexampleForm extends React.Component {
   state = {
     cgExampleData: {},
+    inputSize:'normal',
     cgExampleFormStatus: "CREATE",
-    colSpan: {
-      xs: 24,
-      sm: 12,
-      md: 8,
-      lg: 6,
-      xl: 4,
-      xxl: 3,
-    },
+    // colSpan: {
+    //   xs: 24,
+    //   sm: 12,
+    //   md: 8,
+    //   lg: 6,
+    //   xl: 4,
+    //   xxl: 3,
+    // },
+    colSpan:{
+      xs:24,
+      sm:24,
+      md:24,
+      lg:24,
+      xl:24,
+      xxl:24
+    }
   };
 
   static propTypes = {
@@ -80,7 +89,7 @@ class CgexampleForm extends React.Component {
   createInput = (propName) => {
     return (
       <Input
-        size={"small"}
+        size={this.state.inputSize}
         value={this.state.cgExampleData[propName]}
         onChange={(e) => {
           this.createInputMode(e, propName);
@@ -125,7 +134,7 @@ class CgexampleForm extends React.Component {
               <dt>ID</dt>
               <dd>
                 <Input
-                  size={"small"}
+                  size={this.state.inputSize}
                   value={this.state.cgExampleData.id}
                   onChange={(e) => {
                     this.createInputMode(e, "id");
@@ -139,7 +148,7 @@ class CgexampleForm extends React.Component {
               <dt>userName</dt>
               <dd>
                 <Input
-                  size={"small"}
+                  size={this.state.inputSize}
                   value={this.state.cgExampleData.userName}
                   onChange={(e) => {
                     this.createInputMode(e, "userName");
@@ -153,7 +162,7 @@ class CgexampleForm extends React.Component {
               <dt>userAge</dt>
               <dd>
                 <Input
-                  size={"small"}
+                  size={this.state.inputSize}
                   value={this.state.cgExampleData.userAge}
                   onChange={(e) => {
                     this.createInputMode(e, "userAge");
@@ -167,7 +176,7 @@ class CgexampleForm extends React.Component {
               <dt>userBirthday</dt>
               <dd>
                 <DatePicker
-                  size="small"
+                  size={this.state.inputSize}
                   onChange={(moment, dataStr) => {
                     this.createDateMode(dataStr, "userBirthday");
                   }}

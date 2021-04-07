@@ -1,10 +1,14 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAnchor, faBicycle } from "@fortawesome/fontawesome-free-solid";
+
 import {
   Menu,
   Modal,
   Table,
   Button,
   Input,
+  InputNumber,
   Dropdown,
   Space,
   Tooltip,
@@ -14,14 +18,18 @@ import {
   Popconfirm,
   Row,
   Col,
+  Popover,
   Card,
+  DatePicker,
 } from "antd";
 import CgexampleApi from "@/api/CgexampleApi";
 import DateUtils from "@/tools/DateUtils";
 import CgexampleForm from "./CgexampleForm";
 import CgexampleView from "./CgexampleView";
+import moment from "moment";
 import {
-  UserOutlined,
+  SearchOutlined,
+  UpOutlined,
   EyeOutlined,
   CloseCircleFilled,
   TableOutlined,
@@ -36,9 +44,13 @@ import {
 const { Search } = Input;
 class CgexampleList extends React.Component {
   state = {
+    advanceSearchVisible: false,
+    colSpan: 24,
     viewType: "LIST",
     // 查询条件
-    cgExampleQueryCondition: {},
+    cgExampleQueryCondition: {
+      id: "",
+    },
     // loading状态
     cgExampleTabLoading: false,
     // 分页数据
@@ -62,7 +74,7 @@ class CgexampleList extends React.Component {
     },
     // 表格数据
     cgExampleTabData: [],
-
+    selectedRowKeys:[],
     // modal cgExampleId
     cgExampleId: "",
     // cgExample编辑modal visible
@@ -76,8 +88,14 @@ class CgexampleList extends React.Component {
     this.queryCgExampleTabData();
   }
 
+  // 选择框改变
+  onSelectChange = selectedRowKeys => {
+    // console.log('selectedRowKeys changed: ', selectedRowKeys);
+    this.setState({ selectedRowKeys:[...this.state.selectedRowKeys,...selectedRowKeys] });
+  };
+
   // 表格改变事件
-  cgExampleTabChange = (pagination, filters, sorter) => {
+  tabChange = (pagination, filters, sorter) => {
     console.log("pagination", pagination);
     console.log("filter", filters);
     console.log("sorter", sorter);
@@ -166,9 +184,10 @@ class CgexampleList extends React.Component {
       });
   };
 
+  // 操作按钮的下拉菜单
   createOperate = (record) => {
     const menu = (
-      // JSON.stringify(record)
+      
       <Menu>
         <Menu.Item key="1" icon={<DeleteOutlined />}>
           <Popconfirm
@@ -215,6 +234,7 @@ class CgexampleList extends React.Component {
     );
   };
 
+  // keywords 搜索
   onSearch = (keyWords) => {
     this.setState(
       {
@@ -222,6 +242,18 @@ class CgexampleList extends React.Component {
           ...this.state.cgExampleQueryCondition,
           keyWords,
         },
+      },
+      () => {
+        this.queryCgExampleTabData(true);
+      }
+    );
+  };
+
+  // 重置搜索条件
+  resetSearch = () => {
+    this.setState(
+      {
+        cgExampleQueryCondition: {},
       },
       () => {
         this.queryCgExampleTabData(true);
@@ -242,7 +274,7 @@ class CgexampleList extends React.Component {
     this.setState(
       {
         cgExampleQueryCondition: {
-          ...this.state.cgExampleQueryCondition,
+          // ...this.state.cgExampleQueryCondition,
           keyWords: "",
         },
       },
@@ -252,15 +284,7 @@ class CgexampleList extends React.Component {
     );
   };
 
-  addCgExample = () => {
-    CgexampleApi.addCgExample({
-      userName: "2222",
-      userBirthday: "2020-01-01",
-    }).then((r) => {
-      console.log(r);
-    });
-  };
-
+  // 删除CgExample
   logicDeleteCgExample = (cgExampleId) => {
     CgexampleApi.logicDeleteCgExample(cgExampleId)
       .then((r) => {
@@ -272,18 +296,21 @@ class CgexampleList extends React.Component {
       });
   };
 
+  // 关闭 编辑 modal
   closeCgexampleFormModal = () => {
     this.setState({
       cgExampleFormModalVisible: false,
       cgExampleId: "",
     });
   };
+  // 关闭 视图 modal
   closeCgexampleViewModal = () => {
     this.setState({
       cgExampleViewModalVisible: false,
       cgExampleId: "",
     });
   };
+  // 打开 编辑 modal
   openCgexampleFormModal = (cgExampleId) => {
     if (cgExampleId) {
       this.setState({
@@ -296,12 +323,15 @@ class CgexampleList extends React.Component {
       });
     }
   };
+  // 打开 视图 modal
   openCgexampleViewModal = (cgExampleId) => {
     this.setState({
       cgExampleId: cgExampleId,
       cgExampleViewModalVisible: true,
     });
   };
+
+  // 切换视图类型
   toggleViewType = () => {
     if (this.state.viewType === "LIST") {
       this.setState({
@@ -313,6 +343,25 @@ class CgexampleList extends React.Component {
       });
     }
   };
+
+  // 高级搜索显示/隐藏 回调
+  handleAdvanceSearchVisibleChange = (b) => {
+    this.setState({
+      advanceSearchVisible: b,
+    });
+  };
+
+  // 双向绑定
+  createMode = (v, propName) => {
+    this.setState({
+      cgExampleQueryCondition: {
+        ...this.state.cgExampleQueryCondition,
+        [propName]: v,
+      },
+    });
+  };
+
+  // =============================== render  =============================== //
   render() {
     // 表格字段
     const cgExampleTabDataColumns = [
@@ -345,18 +394,60 @@ class CgexampleList extends React.Component {
         },
       },
     ];
+    
+    // 复选框 
+    const { selectedRowKeys } = this.state;
+    const rowSelection = {
+      selectedRowKeys,
+      onChange: this.onSelectChange,
+      selections: [
+        {
+          key: 'selectAllCurrentPage',
+          text: 'Clear All',
+          onSelect: changableRowKeys => {
+            this.setState({ selectedRowKeys: [] });
+          },
+        },
+        {
+          key: 'selectAllPage',
+          text: 'Select All Data',
+          onSelect: changableRowKeys => {
+            let newSelectedRowKeys = [];
+            newSelectedRowKeys = changableRowKeys.filter((key, index) => {
+              if (index % 2 !== 0) {
+                return true;
+              }
+              return false;
+            });
+            this.setState({ selectedRowKeys: newSelectedRowKeys });
+          },
+        },
+      ],
+    };
 
+    // 数据展示内容
     const dataView =
       this.state.viewType === "LIST" ? (
-        <Table
-          loading={this.state.cgExampleTabLoading}
-          rowKey={(record) => record.id}
-          size={"small"}
-          columns={cgExampleTabDataColumns}
-          dataSource={this.state.cgExampleTabData}
-          pagination={this.state.cgExampleTabPagination}
-          onChange={this.cgExampleTabChange}
-        />
+        <div
+          style={{
+            background: "#ecf0f5",
+            borderRadius: 3,
+            padding: 12,
+          }}
+        >
+          <div className="block">
+            <Table
+              rowSelection={rowSelection}
+              loading={this.state.cgExampleTabLoading}
+              rowKey={(record) => record.id}
+              size={"small"}
+              columns={cgExampleTabDataColumns}
+              dataSource={this.state.cgExampleTabData}
+              pagination={this.state.cgExampleTabPagination}
+              onChange={this.tabChange}
+            />
+          </div>
+        </div>
       ) : (
         <div>
           <div
@@ -364,74 +455,162 @@ class CgexampleList extends React.Component {
               display: "flex",
               flexDirection: "row",
               flexWrap: "wrap",
-              justifyContent: "space-around",
-              background:"#eee",
-              padding:4
+              justifyContent: "flex-start",
+              background: "#ecf0f5",
+              borderRadius: 3,
+              padding: 4,
             }}
           >
             {this.state.cgExampleTabData.map((item) => {
               return (
-                <div
-                  className="block"
-                  style={{ flex: "0 0 300px", marginTop: 8 }}
-                  key={item.id}
-                >
-                  <div className="title">{item.userName}</div>
+                <div style={{ flex: "0 0 20%", padding: 8 }} key={item.id}>
+                  <div className="block">
+                    <div className="title">{item.userName}</div>
 
-                  <dl className="profile">
-                    <dt>Age</dt>
-                    <dd>{item.userAge}</dd>
-                  </dl>
+                    <dl className="profile">
+                      <dt>Age</dt>
+                      <dd>{item.userAge}</dd>
+                    </dl>
 
-                  <dl className="profile">
-                    <dt>Birthday</dt>
-                    <dd> {DateUtils.formatToDate(item.userBirthday)}</dd>
-                  </dl>
+                    <dl className="profile">
+                      <dt>Birthday</dt>
+                      <dd> {DateUtils.formatToDate(item.userBirthday)}</dd>
+                    </dl>
 
-                  <div className="divider"></div>
-                  <div style={{ textAlign: "right" }}>
-                    {this.createOperate(item)}
+                    <div className="divider"></div>
+                    <div style={{ textAlign: "right" }}>
+                      {this.createOperate(item)}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div style={{textAlign:'right'}}>
-          <Pagination
-            style={{marginTop:8}}
-            {...this.state.cgExampleTabPagination}
-            onChange={this.cgExampleTabPaginationChange}
-          />
+          <div style={{ textAlign: "right" }}>
+            <Pagination
+              style={{ marginTop: 8 }}
+              {...this.state.cgExampleTabPagination}
+              onChange={this.cgExampleTabPaginationChange}
+            />
           </div>
         </div>
       );
+    
+    // ============== 高级搜索面板 =============== //
+    const advanceSearch = (
+      <div style={{ width: 200 }}>
+        <Row gutter={24}>
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>ID</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.cgExampleQueryCondition.id}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "id");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>userName</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.cgExampleQueryCondition.userName}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "userName");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>userAge</dt>
+              <dd>
+                <InputNumber
+                  size={this.state.inputSize}
+                  value={this.state.cgExampleQueryCondition.userAge}
+                  onChange={(v) => {
+                    this.createMode(v, "userAge");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>userBirthday</dt>
+              <dd>
+                <DatePicker
+                  size={this.state.inputSize}
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "userBirthday");
+                  }}
+                  value={
+                    this.state.cgExampleQueryCondition.userBirthday
+                      ? moment(
+                          this.state.cgExampleQueryCondition.userBirthday,
+                          "YYYY-MM-DD"
+                        )
+                      : null
+                  }
+                />
+              </dd>
+            </dl>
+          </Col>
+        </Row>
+        <Divider style={{ margin: "8px 0px" }}></Divider>
+        <div style={{ textAlign: "center" }}>
+          <Button
+            style={{ marginRight: 8 }}
+            onClick={() => {
+              this.queryCgExampleTabData(true);
+            }}
+            icon={<SearchOutlined />}
+          >
+            Search
+          </Button>
+          <Button onClick={this.resetSearch}>Reset</Button>
+        </div>
+      </div>
+    );
 
+
+
+    // ============== 组件返回内容 =============== //
     return (
-      <div >
+      <div>
         <Row gutter={24}>
           <Col span={12}>
-            {this.state.viewType === "ITEM" ? (
-              <div style={{paddingTop:4}}>
-                <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
-                <Divider type="vertical" />
-                <UnorderedListOutlined
-                  onClick={this.toggleViewType}
-                  style={{ fontSize: 12 }}
-                />
-              </div>
-            ) : (
-              <div style={{paddingTop:4}}>
-                <TableOutlined
-                  onClick={this.toggleViewType}
-                  style={{ fontSize: 12 }}
-                />
-                <Divider type="vertical" />
-                <UnorderedListOutlined
-                  style={{ fontSize: 16, color: "#1890ff" }}
-                />
-              </div>
-            )}
+            <div style={{ paddingTop: 4 }}>
+              {this.state.viewType === "ITEM" ? (
+                <span>
+                  <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
+                  <Divider type="vertical" />
+                  <UnorderedListOutlined
+                    onClick={this.toggleViewType}
+                    style={{ fontSize: 12 }}
+                  />
+                </span>
+              ) : (
+                <span>
+                  <TableOutlined
+                    onClick={this.toggleViewType}
+                    style={{ fontSize: 12 }}
+                  />
+                  <Divider type="vertical" />
+                  <UnorderedListOutlined
+                    style={{ fontSize: 16, color: "#1890ff" }}
+                  />
+                </span>
+              )}
+            </div>
           </Col>
           <Col span={12}>
             <div className="tabTool">
@@ -449,6 +628,27 @@ class CgexampleList extends React.Component {
                 value={this.state.cgExampleQueryCondition.keyWords}
                 enterButton
               />
+
+              <Popover
+                content={advanceSearch}
+                trigger="click"
+                title="Advance Search"
+                visible={this.state.advanceSearchVisible}
+                onVisibleChange={this.handleAdvanceSearchVisibleChange}
+              >
+                <Button
+                  type="link"
+                  icon={
+                    this.state.advanceSearchVisible ? (
+                      <UpOutlined />
+                    ) : (
+                      <DownOutlined />
+                    )
+                  }
+                >
+                  Advance
+                </Button>
+              </Popover>
 
               <Tooltip title="Create">
                 <Button
@@ -496,6 +696,15 @@ class CgexampleList extends React.Component {
             closeFn={this.closeCgexampleViewModal}
           ></CgexampleView>
         </Modal>
+
+        <FontAwesomeIcon
+          icon={faAnchor}
+          style={{ fontSize: 20, marginRight: 8, color: "#1890ff" }}
+        />
+        <FontAwesomeIcon
+          icon={faBicycle}
+          style={{ fontSize: 20, marginRight: 8, color: "#1890ff" }}
+        />
       </div>
     );
   }
