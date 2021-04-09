@@ -21,14 +21,14 @@ import {
   Row,
   Col,
   Popover,
-  Empty ,
+  Empty,
   Card,
   DatePicker,
 } from "antd";
 import CgTestApi from "@/api/CgTestApi";
 import DateUtils from "@/tools/DateUtils";
 import CgTestForm from "./CgTestForm";
-
+import CgTestView from "./CgTestView";
 import moment from "moment";
 import {
   SearchOutlined,
@@ -52,7 +52,7 @@ class CgTestList extends React.Component {
     viewType: "LIST",
     // 查询条件
     queryCondition: {
-      id: "",
+      userId: "",
     },
     // loading状态
     tabLoading: false,
@@ -242,7 +242,7 @@ class CgTestList extends React.Component {
           key="2"
           onClick={() => {
             // message.info(JSON.stringify(record));
-            this.openCgTestViewModal(record.id);
+            this.openCgTestViewModal(record.userId);
           }}
           icon={<EyeOutlined />}
         >
@@ -255,7 +255,7 @@ class CgTestList extends React.Component {
         <a
           className="ant-dropdown-link"
           onClick={() => {
-            this.openCgTestFormModal(record.id);
+            this.openCgTestFormModal(record.userId);
           }}
         >
           Edit
@@ -421,27 +421,27 @@ class CgTestList extends React.Component {
   render() {
     // 表格字段
     const tabDataColumns = [
-        {
-            title: "userName",
-            dataIndex: "userName",
-            key: "userName",
-            sorter: true,
+      {
+        title: "userName",
+        dataIndex: "userName",
+        key: "userName",
+        sorter: true,
+      },
+      {
+        title: "userAge",
+        dataIndex: "userAge",
+        key: "userAge",
+        sorter: true,
+      },
+      {
+        title: "userBirthday",
+        dataIndex: "userBirthday",
+        key: "userBirthday",
+        sorter: true,
+        render: (text, record, index) => {
+          return DateUtils.formatToDate(text);
         },
-        {
-            title: "userAge",
-            dataIndex: "userAge",
-            key: "userAge",
-            sorter: true,
-        },
-        {
-            title: "userBirthday",
-            dataIndex: "userBirthday",
-            key: "userBirthday",
-            sorter: true,
-            render: (text, record, index) => {
-                return DateUtils.formatToDate(text);
-            },
-        },
+      },
       {
         title: "Operate",
         key: "operate",
@@ -510,26 +510,31 @@ class CgTestList extends React.Component {
           {this.state.tabData.length > 0 ? (
             this.state.tabData.map((item) => {
               return (
-                <div style={{ flex: "0 0 20%", padding: 8 }} key={item.id}>
+                <div style={{ flex: "0 0 20%", padding: 8 }} key={item.userId}>
                   <div className="block">
-                    <div className="title">{item.userName}</div>
+                    <div className="title">{item.userId}</div>
 
                     <dl className="profile">
-                      <dt>Age</dt>
+                      <dt>userName</dt>
+                      <dd>{item.userName}</dd>
+                    </dl>
+
+                    <dl className="profile">
+                      <dt>userAge</dt>
                       <dd>{item.userAge}</dd>
                     </dl>
 
                     <dl className="profile">
-                      <dt>Birthday</dt>
-                      <dd> {DateUtils.formatToDate(item.userBirthday)}</dd>
+                      <dt>userBirthday</dt>
+                      <dd>{DateUtils.formatToDate(item.userBirthday)}</dd>
                     </dl>
 
                     <div className="divider"></div>
                     <div style={{ display: "flex" }}>
                       <div style={{ flex: "1 1 auto", paddingTop: 4 }}>
                         <Checkbox
-                          checked={this.checkedInit(item.id)}
-                          value={item.id}
+                          checked={this.checkedInit(item.userId)}
+                          value={item.userId}
                           onChange={this.checkboxChange}
                         />
                       </div>
@@ -542,7 +547,16 @@ class CgTestList extends React.Component {
               );
             })
           ) : (
-            <div style={{ padding: 8 ,textAlign:'center',background:'#fff',width:'100%'}}><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /></div>
+            <div
+              style={{
+                padding: 8,
+                textAlign: "center",
+                background: "#fff",
+                width: "100%",
+              }}
+            >
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            </div>
           )}
         </div>
 
@@ -568,14 +582,15 @@ class CgTestList extends React.Component {
               <dd>
                 <Input
                   size={this.state.inputSize}
-                  value={this.state.queryCondition.id}
+                  value={this.state.queryCondition.userId}
                   onChange={(e) => {
-                    this.createMode(e.target.value, "id");
+                    this.createMode(e.target.value, "userId");
                   }}
                 />
               </dd>
             </dl>
           </Col>
+
           <Col {...this.state.colSpan}>
             <dl className="form_col">
               <dt>userName</dt>
@@ -590,20 +605,22 @@ class CgTestList extends React.Component {
               </dd>
             </dl>
           </Col>
+
           <Col {...this.state.colSpan}>
             <dl className="form_col">
               <dt>userAge</dt>
               <dd>
-                <InputNumber
+                <Input
                   size={this.state.inputSize}
                   value={this.state.queryCondition.userAge}
-                  onChange={(v) => {
-                    this.createMode(v, "userAge");
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "userAge");
                   }}
                 />
               </dd>
             </dl>
           </Col>
+
           <Col {...this.state.colSpan}>
             <dl className="form_col">
               <dt>userBirthday</dt>
@@ -767,7 +784,7 @@ class CgTestList extends React.Component {
 
         {/* ======================= modal窗口 ======================= */}
         <Modal
-          title="Cg Example Info"
+          title="CgTest Information"
           visible={this.state.formModalVisible}
           footer={null}
           width={"100%"}
@@ -781,17 +798,21 @@ class CgTestList extends React.Component {
             closeFn={this.closeCgTestFormModal}
             cb={this.queryTabData}
           ></CgTestForm>
-        </Modal>
+        </Modal> 
 
         <Modal
-          title="Cg Example Info"
+          title="Edit CgTest"
           visible={this.state.viewModalVisible}
           width={"100%"}
           destroyOnClose={true}
           onCancel={this.closeCgTestViewModal}
           maskClosable={false}
         >
-         
+          <CgTestView
+            cgTestId={this.state.cgTestId}
+            canEdit={true}
+            closeFn={this.closeCgTestViewModal}
+          ></CgTestView>
         </Modal>
       </div>
     );

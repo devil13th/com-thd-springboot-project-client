@@ -25,10 +25,10 @@ import {
   Card,
   DatePicker,
 } from "antd";
-import CgTestApi from "@/api/CgTestApi";
+import MyPlanApi from "@/api/MyPlanApi";
 import DateUtils from "@/tools/DateUtils";
-import CgTestForm from "./CgTestForm";
-
+import MyPlanForm from "./MyPlanForm";
+import MyPlanView from "./MyPlanView";
 import moment from "moment";
 import {
   SearchOutlined,
@@ -45,14 +45,14 @@ import {
 } from "@ant-design/icons";
 
 const { Search } = Input;
-class CgTestList extends React.Component {
+class MyPlanList extends React.Component {
   state = {
     advanceSearchVisible: false,
     colSpan: 24,
     viewType: "LIST",
     // 查询条件
     queryCondition: {
-      id: "",
+      planId: "",
     },
     // loading状态
     tabLoading: false,
@@ -78,12 +78,12 @@ class CgTestList extends React.Component {
     // 表格数据
     tabData: [],
     selectedRowKeys: [],
-    // modal cgTestId
-    cgTestId: "",
-    // cgTest编辑modal visible
+    // modal myPlanId
+    myPlanId: "",
+    // myPlan编辑modal visible
     formModalVisible: false,
 
-    // cgTest view modal visible
+    // myPlan view modal visible
     viewModalVisible: false,
   };
 
@@ -202,7 +202,7 @@ class CgTestList extends React.Component {
     queryCondition.pageSize = this.state.tabPagination.pageSize;
     queryCondition.sortField = this.state.tabSort.field;
     queryCondition.sortOrder = this.state.tabSort.order;
-    CgTestApi.queryCgTestLikeByPage(queryCondition)
+    MyPlanApi.queryMyPlanLikeByPage(queryCondition)
       .then((r) => {
         this.setState({
           tabLoading: false,
@@ -230,7 +230,7 @@ class CgTestList extends React.Component {
             placement="topLeft"
             title="Are you confirm delete this record"
             onConfirm={() => {
-              this.logicDeleteCgTest(record.userId);
+              this.logicDeleteMyPlan(record.planId);
             }}
             okText="Yes"
             cancelText="No"
@@ -242,7 +242,7 @@ class CgTestList extends React.Component {
           key="2"
           onClick={() => {
             // message.info(JSON.stringify(record));
-            this.openCgTestViewModal(record.id);
+            this.openMyPlanViewModal(record.planId);
           }}
           icon={<EyeOutlined />}
         >
@@ -255,7 +255,7 @@ class CgTestList extends React.Component {
         <a
           className="ant-dropdown-link"
           onClick={() => {
-            this.openCgTestFormModal(record.id);
+            this.openMyPlanFormModal(record.planId);
           }}
         >
           Edit
@@ -320,9 +320,9 @@ class CgTestList extends React.Component {
     );
   };
 
-  // 删除CgTest
-  logicDeleteCgTest = (cgTestId) => {
-    CgTestApi.logicDeleteCgTest(cgTestId)
+  // 删除MyPlan
+  logicDeleteMyPlan = (myPlanId) => {
+    MyPlanApi.logicDeleteMyPlan(myPlanId)
       .then((r) => {
         message.info("SUCCESS");
         this.queryTabData();
@@ -332,10 +332,10 @@ class CgTestList extends React.Component {
       });
   };
 
-  // 批量删除CgTest
-  deleteLogicByCgTestIds = () => {
+  // 批量删除MyPlan
+  deleteLogicByMyPlanIds = () => {
     if (this.state.selectedRowKeys.length > 0) {
-      CgTestApi.deleteLogicByCgTestIds(this.state.selectedRowKeys)
+      MyPlanApi.deleteLogicByMyPlanIds(this.state.selectedRowKeys)
         .then((r) => {
           message.info("SUCCESS");
 
@@ -353,24 +353,24 @@ class CgTestList extends React.Component {
   };
 
   // 关闭 编辑 modal
-  closeCgTestFormModal = () => {
+  closeMyPlanFormModal = () => {
     this.setState({
       formModalVisible: false,
-      cgTestId: "",
+      myPlanId: "",
     });
   };
   // 关闭 视图 modal
-  closeCgTestViewModal = () => {
+  closeMyPlanViewModal = () => {
     this.setState({
       viewModalVisible: false,
-      cgTestId: "",
+      myPlanId: "",
     });
   };
   // 打开 编辑 modal
-  openCgTestFormModal = (cgTestId) => {
-    if (cgTestId) {
+  openMyPlanFormModal = (myPlanId) => {
+    if (myPlanId) {
       this.setState({
-        cgTestId: cgTestId,
+        myPlanId: myPlanId,
         formModalVisible: true,
       });
     } else {
@@ -380,9 +380,9 @@ class CgTestList extends React.Component {
     }
   };
   // 打开 视图 modal
-  openCgTestViewModal = (cgTestId) => {
+  openMyPlanViewModal = (myPlanId) => {
     this.setState({
-      cgTestId: cgTestId,
+      myPlanId: myPlanId,
       viewModalVisible: true,
     });
   };
@@ -422,21 +422,36 @@ class CgTestList extends React.Component {
     // 表格字段
     const tabDataColumns = [
         {
-            title: "userName",
-            dataIndex: "userName",
-            key: "userName",
+            title: "title",
+            dataIndex: "title",
+            key: "title",
             sorter: true,
         },
         {
-            title: "userAge",
-            dataIndex: "userAge",
-            key: "userAge",
+            title: "detail",
+            dataIndex: "detail",
+            key: "detail",
             sorter: true,
         },
         {
-            title: "userBirthday",
-            dataIndex: "userBirthday",
-            key: "userBirthday",
+            title: "days",
+            dataIndex: "days",
+            key: "days",
+            sorter: true,
+        },
+        {
+            title: "fromDate",
+            dataIndex: "fromDate",
+            key: "fromDate",
+            sorter: true,
+            render: (text, record, index) => {
+                return DateUtils.formatToDate(text);
+            },
+        },
+        {
+            title: "toDate",
+            dataIndex: "toDate",
+            key: "toDate",
             sorter: true,
             render: (text, record, index) => {
                 return DateUtils.formatToDate(text);
@@ -483,7 +498,7 @@ class CgTestList extends React.Component {
           <Table
             rowSelection={rowSelection}
             loading={this.state.tabLoading}
-            rowKey={(record) => record.userId}
+            rowKey={(record) => record.planId}
             size={"small"}
             columns={tabDataColumns}
             dataSource={this.state.tabData}
@@ -510,26 +525,69 @@ class CgTestList extends React.Component {
           {this.state.tabData.length > 0 ? (
             this.state.tabData.map((item) => {
               return (
-                <div style={{ flex: "0 0 20%", padding: 8 }} key={item.id}>
+                <div style={{ flex: "0 0 20%", padding: 8 }} key={item.planId}>
                   <div className="block">
-                    <div className="title">{item.userName}</div>
 
-                    <dl className="profile">
-                      <dt>Age</dt>
-                      <dd>{item.userAge}</dd>
-                    </dl>
 
-                    <dl className="profile">
-                      <dt>Birthday</dt>
-                      <dd> {DateUtils.formatToDate(item.userBirthday)}</dd>
-                    </dl>
+                    <div className="title">{item.planId}</div>
+
+
+
+                                                 <dl className="profile">
+                                                                       <dt>title</dt>
+                                                                       <dd>{item.title}</dd>
+                                                                     </dl>
+
+
+
+
+
+                                                 <dl className="profile">
+                                                                       <dt>detail</dt>
+                                                                       <dd>{item.detail}</dd>
+                                                                     </dl>
+
+
+
+
+
+                                                 <dl className="profile">
+                                                                       <dt>days</dt>
+                                                                       <dd>{item.days}</dd>
+                                                                     </dl>
+
+
+
+
+
+                                                <dl className="profile">
+                                                                      <dt>fromDate</dt>
+                                                                      <dd>{DateUtils.formatToDate(item.fromDate)}</dd>
+                                                                    </dl>
+
+
+
+
+
+
+                                                <dl className="profile">
+                                                                      <dt>toDate</dt>
+                                                                      <dd>{DateUtils.formatToDate(item.toDate)}</dd>
+                                                                    </dl>
+
+
+
+
+
+
+
 
                     <div className="divider"></div>
                     <div style={{ display: "flex" }}>
                       <div style={{ flex: "1 1 auto", paddingTop: 4 }}>
                         <Checkbox
-                          checked={this.checkedInit(item.id)}
-                          value={item.id}
+                          checked={this.checkedInit(item.planId)}
+                          value={item.planId}
                           onChange={this.checkboxChange}
                         />
                       </div>
@@ -562,69 +620,130 @@ class CgTestList extends React.Component {
     const advanceSearch = (
       <div style={{ width: 200 }}>
         <Row gutter={24}>
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>ID</dt>
-              <dd>
-                <Input
-                  size={this.state.inputSize}
-                  value={this.state.queryCondition.id}
-                  onChange={(e) => {
-                    this.createMode(e.target.value, "id");
-                  }}
-                />
-              </dd>
-            </dl>
-          </Col>
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>userName</dt>
-              <dd>
-                <Input
-                  size={this.state.inputSize}
-                  value={this.state.queryCondition.userName}
-                  onChange={(e) => {
-                    this.createMode(e.target.value, "userName");
-                  }}
-                />
-              </dd>
-            </dl>
-          </Col>
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>userAge</dt>
-              <dd>
-                <InputNumber
-                  size={this.state.inputSize}
-                  value={this.state.queryCondition.userAge}
-                  onChange={(v) => {
-                    this.createMode(v, "userAge");
-                  }}
-                />
-              </dd>
-            </dl>
-          </Col>
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>userBirthday</dt>
-              <dd>
-                <DatePicker
-                  size={this.state.inputSize}
-                  onChange={(moment, dataStr) => {
-                    this.createMode(dataStr, "userBirthday");
-                  }}
-                  value={
-                    this.state.queryCondition.userBirthday
-                      ? moment(
-                          this.state.queryCondition.userBirthday,
-                          "YYYY-MM-DD"
-                        )
-                      : null
-                  }
-                />
-              </dd>
-            </dl>
-          </Col>
+
+
+            <Col {...this.state.colSpan}>
+                        <dl className="form_col">
+                          <dt>ID</dt>
+                          <dd>
+                            <Input
+                              size={this.state.inputSize}
+                              value={this.state.queryCondition.planId}
+                              onChange={(e) => {
+                                this.createMode(e.target.value, "planId");
+                              }}
+                            />
+                          </dd>
+                        </dl>
+                      </Col>
+
+
+
+
+                             <Col {...this.state.colSpan}>
+                                 <dl className="form_col">
+                                   <dt>title</dt>
+                                   <dd>
+                                     <Input
+                                       size={this.state.inputSize}
+                                       value={this.state.queryCondition.title}
+                                       onChange={(e) => {
+                                         this.createMode(e.target.value, "title");
+                                       }}
+                                     />
+                                   </dd>
+                                 </dl>
+                               </Col>
+
+
+
+
+                             <Col {...this.state.colSpan}>
+                                 <dl className="form_col">
+                                   <dt>detail</dt>
+                                   <dd>
+                                     <Input
+                                       size={this.state.inputSize}
+                                       value={this.state.queryCondition.detail}
+                                       onChange={(e) => {
+                                         this.createMode(e.target.value, "detail");
+                                       }}
+                                     />
+                                   </dd>
+                                 </dl>
+                               </Col>
+
+
+
+                            <Col {...this.state.colSpan}>
+                             <dl className="form_col">
+                               <dt>days</dt>
+                               <dd>
+                                 <Input
+                                   size={this.state.inputSize}
+                                   value={this.state.queryCondition.days}
+                                   onChange={(e) => {
+                                     this.createMode(e.target.value, "days");
+                                   }}
+                                 />
+                               </dd>
+                             </dl>
+                           </Col>
+
+
+
+
+                             <Col {...this.state.colSpan}>
+                                        <dl className="form_col">
+                                          <dt>fromDate</dt>
+                                          <dd>
+                                            <DatePicker
+                                              size={this.state.inputSize}
+                                              onChange={(moment, dataStr) => {
+                                                this.createMode(dataStr, "fromDate");
+                                              }}
+                                              value={
+                                                this.state.queryCondition.fromDate
+                                                  ? moment(
+                                                      this.state.queryCondition.fromDate,
+                                                      "YYYY-MM-DD"
+                                                    )
+                                                  : null
+                                              }
+                                            />
+                                          </dd>
+                                        </dl>
+                                      </Col>
+
+
+
+
+
+                             <Col {...this.state.colSpan}>
+                                        <dl className="form_col">
+                                          <dt>toDate</dt>
+                                          <dd>
+                                            <DatePicker
+                                              size={this.state.inputSize}
+                                              onChange={(moment, dataStr) => {
+                                                this.createMode(dataStr, "toDate");
+                                              }}
+                                              value={
+                                                this.state.queryCondition.toDate
+                                                  ? moment(
+                                                      this.state.queryCondition.toDate,
+                                                      "YYYY-MM-DD"
+                                                    )
+                                                  : null
+                                              }
+                                            />
+                                          </dd>
+                                        </dl>
+                                      </Col>
+
+
+
+
         </Row>
         <Divider style={{ margin: "8px 0px" }}></Divider>
         <div style={{ textAlign: "center" }}>
@@ -714,7 +833,7 @@ class CgTestList extends React.Component {
                   type="primary"
                   icon={<PlusOutlined />}
                   onClick={() => {
-                    this.openCgTestFormModal();
+                    this.openMyPlanFormModal();
                   }}
                 ></Button>
               </Tooltip>
@@ -750,7 +869,7 @@ class CgTestList extends React.Component {
                     <Popconfirm
                       placement="topLeft"
                       title="Are you confirm delete this record"
-                      onConfirm={this.deleteLogicByCgTestIds}
+                      onConfirm={this.deleteLogicByMyPlanIds}
                       okText="Yes"
                       cancelText="No"
                     >
@@ -767,34 +886,38 @@ class CgTestList extends React.Component {
 
         {/* ======================= modal窗口 ======================= */}
         <Modal
-          title="Cg Example Info"
+          title="MyPlan Information"
           visible={this.state.formModalVisible}
           footer={null}
           width={"100%"}
           destroyOnClose={true}
-          onCancel={this.closeCgTestFormModal}
+          onCancel={this.closeMyPlanFormModal}
           maskClosable={false}
         >
-          <CgTestForm
-            cgTestId={this.state.cgTestId}
+          <MyPlanForm
+            myPlanId={this.state.myPlanId}
             canEdit={true}
-            closeFn={this.closeCgTestFormModal}
+            closeFn={this.closeMyPlanFormModal}
             cb={this.queryTabData}
-          ></CgTestForm>
+          ></MyPlanForm>
         </Modal>
 
         <Modal
-          title="Cg Example Info"
+          title="Edit MyPlan"
           visible={this.state.viewModalVisible}
           width={"100%"}
           destroyOnClose={true}
-          onCancel={this.closeCgTestViewModal}
+          onCancel={this.closeMyPlanViewModal}
           maskClosable={false}
         >
-         
+          <MyPlanView
+            myPlanId={this.state.myPlanId}
+            canEdit={true}
+            closeFn={this.closeMyPlanViewModal}
+          ></MyPlanView>
         </Modal>
       </div>
     );
   }
 }
-export default CgTestList;
+export default MyPlanList;

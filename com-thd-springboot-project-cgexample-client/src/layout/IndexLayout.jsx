@@ -15,6 +15,8 @@ import {
 } from '@ant-design/icons';
 
 import CgexampleList from '@/components/CgexampleList'
+import CgTestList from '@/components/CgTestList'
+import MyPlanList from '@/components/MyPlanList'
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -43,6 +45,12 @@ class IndexLayout extends React.Component {
             <Menu.Item key="cgexampleList" icon={<SlidersOutlined />}>
               <Link to="/cgexampleList" >Cgexample List</Link>
             </Menu.Item>
+            <Menu.Item key="cgtestList" icon={<SlidersOutlined />}>
+              <Link to="/cgtestList" >Cgtest List</Link>
+            </Menu.Item>
+            <Menu.Item key="myplanList" icon={<SlidersOutlined />}>
+              <Link to="/myplanList" >MyPlan List</Link>
+            </Menu.Item>
           </Menu>
         </Sider>
         <Layout className="site-layout">
@@ -56,7 +64,17 @@ class IndexLayout extends React.Component {
                 exact
                 component={CgexampleList}
               ></Route>
-              
+
+<Route
+                path="/cgtestList"
+                exact
+                component={CgTestList}
+              ></Route>
+     <Route
+                path="/myplanList"
+                exact
+                component={MyPlanList}
+              ></Route>         
             </div>
           </Content> 
           <Footer style={{ textAlign: "center" }}>
