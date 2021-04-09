@@ -13,7 +13,7 @@ import TaskList from "./TaskList";
 import TaskHisList from "./TaskHisList";
 import ProcessVariable from '../processvariable/ProcessVariable'
 import ProcessApi from "@/api/ProcessApi";
-
+import DateUtils from '@/tools/DateUtils'
 const { Search } = Input;
 const { TabPane } = Tabs;
 const {Option} = Select;
@@ -215,10 +215,16 @@ class ProcessInstanceList extends React.Component {
       {
         title: "Start",
         dataIndex: "processInstanceStartTime",
+        render: (text, record, index) => {
+          return DateUtils.formatToTime(text);
+        }
       },
       {
         title: "End",
         dataIndex: "processInstanceEndTime",
+        render: (text, record, index) => {
+          return DateUtils.formatToTime(text);
+        }
       },
       {
         title: "Operate",

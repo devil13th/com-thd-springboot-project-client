@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import ProcessApi from '@/api/ProcessApi'
 import ProcessVariable from '../processvariable/ProcessVariable'
 import TaskInfo from './TaskInfo'
+import DateUtils from '@/tools/DateUtils'
 import {OrderedListOutlined,UserSwitchOutlined,CaretRightOutlined,InfoCircleOutlined,SettingOutlined} from '@ant-design/icons';
 const { TextArea,Search } = Input;
 const { TabPane } = Tabs;
@@ -286,6 +287,9 @@ class TaskList extends React.Component {
       {
         title: "Start",
         dataIndex: "taskStartTime",
+        render: (text, record, index) => {
+          return DateUtils.formatToTime(text);
+        }
       },
       {
         title: "Form",

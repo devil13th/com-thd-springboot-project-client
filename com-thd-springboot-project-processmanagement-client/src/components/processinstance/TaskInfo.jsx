@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ProcessApi from "@/api/ProcessApi";
 import {Row,Col,Divider} from 'antd'
+import DateUtils from '@/tools/DateUtils'
 class TaskInfo extends React.Component {
   
   
@@ -57,8 +58,8 @@ class TaskInfo extends React.Component {
           <Col span="8">TaskFormKey：{this.state.taskInfo.taskFormKey}</Col>
         </Row>
         <Row gutter={24}>
-          <Col span="8">TaskStartTime：{this.state.taskInfo.taskStartTime}</Col>
-          <Col span="8">TaskEndTime：{this.state.taskInfo.taskEndTime}</Col>
+          <Col span="8">TaskStartTime：{DateUtils.formatToTime(this.state.taskInfo.taskStartTime)}</Col>
+          <Col span="8">TaskEndTime：{DateUtils.formatToTime(this.state.taskInfo.taskEndTime)}</Col>
           <Col span="8"></Col>
         </Row>
 
@@ -86,10 +87,10 @@ class TaskInfo extends React.Component {
         <Row gutter={24}>
           <Col span="8">
             ProcessInstanceStartTime：
-            {this.state.taskInfo.processInstanceStartTime}
+            {DateUtils.formatToTime(this.state.taskInfo.processInstanceStartTime)}
           </Col>
           <Col span="8">
-            ProcessInstanceEndTime：{this.state.taskInfo.processInstanceEndTime}
+            ProcessInstanceEndTime：{DateUtils.formatToTime(this.state.taskInfo.processInstanceEndTime)}
           </Col>
         </Row>
 

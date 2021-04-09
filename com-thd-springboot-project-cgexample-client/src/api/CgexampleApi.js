@@ -35,6 +35,13 @@ export default {
       url: `${context}/cgExample/logicDeleteCgExample/${id}`
     });
   },
+  deleteLogicByCgExampleIds:function(idList){
+    return axios({
+      method: 'delete',
+      url: `${context}/cgExample/deleteLogicByCgExampleIds`,
+      data:idList
+    });
+  }
 
  
   

@@ -4,6 +4,7 @@ import { Popconfirm,Upload, Modal, Tabs, Input, Table, Tooltip, Divider, Button,
 
 import PropTypes from 'prop-types'
 import ProcessApi from '@/api/ProcessApi'
+import DateUtils from '@/tools/DateUtils'
 import { UserSwitchOutlined, CaretRightOutlined, InfoCircleOutlined, SettingOutlined, InboxOutlined,DeleteOutlined } from '@ant-design/icons';
 const { Search, TextArea } = Input;
 const { TabPane } = Tabs;
@@ -224,6 +225,9 @@ class ProcessDefinedList extends React.Component {
       {
         title: "Deployment Time",
         dataIndex: "deployTime",
+        render: (text, record, index) => {
+          return DateUtils.formatToTime(text);
+        }
       },
       {
         title: "Operate",

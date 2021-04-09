@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAnchor, faBicycle } from "@fortawesome/fontawesome-free-solid";
+import { faTimes, fatrash } from "@fortawesome/fontawesome-free-solid";
 
 import {
   Menu,
@@ -8,9 +8,11 @@ import {
   Table,
   Button,
   Input,
+  Alert,
   InputNumber,
   Dropdown,
   Space,
+  Checkbox,
   Tooltip,
   message,
   Divider,
@@ -19,6 +21,7 @@ import {
   Row,
   Col,
   Popover,
+  Empty ,
   Card,
   DatePicker,
 } from "antd";
@@ -74,7 +77,7 @@ class CgexampleList extends React.Component {
     },
     // 表格数据
     cgExampleTabData: [],
-    selectedRowKeys:[],
+    selectedRowKeys: [],
     // modal cgExampleId
     cgExampleId: "",
     // cgExample编辑modal visible
@@ -88,10 +91,44 @@ class CgexampleList extends React.Component {
     this.queryCgExampleTabData();
   }
 
-  // 选择框改变
-  onSelectChange = selectedRowKeys => {
+  // 表格选择框改变
+  onSelectChange = (selectedRowKeys) => {
     // console.log('selectedRowKeys changed: ', selectedRowKeys);
-    this.setState({ selectedRowKeys:[...this.state.selectedRowKeys,...selectedRowKeys] });
+    this.setState({ selectedRowKeys });
+  };
+  // 清除已选择的选择框
+  clearSelectedKeys = () => {
+    this.setState({ selectedRowKeys: [] });
+  };
+
+  // detail视图中的checkbox checked属性初始化
+  checkedInit = (id) => {
+    return (
+      this.state.selectedRowKeys.find((item) => {
+        return item === id;
+      }) !== undefined
+    );
+  };
+  // detail视图中的checkbox checked事件
+  checkboxChange = (e) => {
+    if (e.target.checked) {
+      const f = this.state.selectedRowKeys.find((item) => {
+        return item === e.target.value;
+      });
+      if (f === undefined) {
+        this.setState({
+          selectedRowKeys: [...this.state.selectedRowKeys, e.target.value],
+        });
+      }
+    } else {
+      const filterResult = this.state.selectedRowKeys.filter((item) => {
+        return item !== e.target.value;
+      });
+      console.log(filterResult);
+      this.setState({
+        selectedRowKeys: filterResult,
+      });
+    }
   };
 
   // 表格改变事件
@@ -187,7 +224,6 @@ class CgexampleList extends React.Component {
   // 操作按钮的下拉菜单
   createOperate = (record) => {
     const menu = (
-      
       <Menu>
         <Menu.Item key="1" icon={<DeleteOutlined />}>
           <Popconfirm
@@ -296,6 +332,26 @@ class CgexampleList extends React.Component {
       });
   };
 
+  // 批量删除CgExample
+  deleteLogicByCgExampleIds = () => {
+    if (this.state.selectedRowKeys.length > 0) {
+      CgexampleApi.deleteLogicByCgExampleIds(this.state.selectedRowKeys)
+        .then((r) => {
+          message.info("SUCCESS");
+
+          this.setState({
+            selectedRowKeys: [],
+          });
+          this.queryCgExampleTabData();
+        })
+        .catch((r) => {
+          message.error("FAILURE");
+        });
+    } else {
+      message.error("Please Select A Item At Least");
+    }
+  };
+
   // 关闭 编辑 modal
   closeCgexampleFormModal = () => {
     this.setState({
@@ -394,74 +450,65 @@ class CgexampleList extends React.Component {
         },
       },
     ];
-    
-    // 复选框 
+
+    // 复选框
     const { selectedRowKeys } = this.state;
     const rowSelection = {
       selectedRowKeys,
+      // 为避免远程分页会之前选择的数据
+      preserveSelectedRowKeys: true,
       onChange: this.onSelectChange,
       selections: [
         {
-          key: 'selectAllCurrentPage',
-          text: 'Clear All',
-          onSelect: changableRowKeys => {
+          key: "clearAll",
+          text: "Clear All",
+          onSelect: (changableRowKeys) => {
             this.setState({ selectedRowKeys: [] });
-          },
-        },
-        {
-          key: 'selectAllPage',
-          text: 'Select All Data',
-          onSelect: changableRowKeys => {
-            let newSelectedRowKeys = [];
-            newSelectedRowKeys = changableRowKeys.filter((key, index) => {
-              if (index % 2 !== 0) {
-                return true;
-              }
-              return false;
-            });
-            this.setState({ selectedRowKeys: newSelectedRowKeys });
           },
         },
       ],
     };
 
-    // 数据展示内容
-    const dataView =
-      this.state.viewType === "LIST" ? (
+    // ======================= 数据展示内容 =======================
+
+    const tableView = (
+      <div
+        style={{
+          background: "#ecf0f5",
+          borderRadius: 3,
+          padding: 12,
+        }}
+      >
+        <div className="block">
+          <Table
+            rowSelection={rowSelection}
+            loading={this.state.cgExampleTabLoading}
+            rowKey={(record) => record.id}
+            size={"small"}
+            columns={cgExampleTabDataColumns}
+            dataSource={this.state.cgExampleTabData}
+            pagination={this.state.cgExampleTabPagination}
+            onChange={this.tabChange}
+          />
+        </div>
+      </div>
+    );
+
+    const listView = (
+      <div>
         <div
           style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
             background: "#ecf0f5",
             borderRadius: 3,
-            padding: 12,
+            padding: 4,
           }}
         >
-          <div className="block">
-            <Table
-              rowSelection={rowSelection}
-              loading={this.state.cgExampleTabLoading}
-              rowKey={(record) => record.id}
-              size={"small"}
-              columns={cgExampleTabDataColumns}
-              dataSource={this.state.cgExampleTabData}
-              pagination={this.state.cgExampleTabPagination}
-              onChange={this.tabChange}
-            />
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "flex-start",
-              background: "#ecf0f5",
-              borderRadius: 3,
-              padding: 4,
-            }}
-          >
-            {this.state.cgExampleTabData.map((item) => {
+          {this.state.cgExampleTabData.length > 0 ? (
+            this.state.cgExampleTabData.map((item) => {
               return (
                 <div style={{ flex: "0 0 20%", padding: 8 }} key={item.id}>
                   <div className="block">
@@ -478,25 +525,39 @@ class CgexampleList extends React.Component {
                     </dl>
 
                     <div className="divider"></div>
-                    <div style={{ textAlign: "right" }}>
-                      {this.createOperate(item)}
+                    <div style={{ display: "flex" }}>
+                      <div style={{ flex: "1 1 auto", paddingTop: 4 }}>
+                        <Checkbox
+                          checked={this.checkedInit(item.id)}
+                          value={item.id}
+                          onChange={this.checkboxChange}
+                        />
+                      </div>
+                      <div style={{ flex: "0 0 75px" }}>
+                        {this.createOperate(item)}
+                      </div>
                     </div>
                   </div>
                 </div>
               );
-            })}
-          </div>
-
-          <div style={{ textAlign: "right" }}>
-            <Pagination
-              style={{ marginTop: 8 }}
-              {...this.state.cgExampleTabPagination}
-              onChange={this.cgExampleTabPaginationChange}
-            />
-          </div>
+            })
+          ) : (
+            <div style={{ padding: 8 ,textAlign:'center',background:'#fff',width:'100%'}}><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /></div>
+          )}
         </div>
-      );
-    
+
+        <div style={{ textAlign: "right" }}>
+          <Pagination
+            style={{ marginTop: 8 }}
+            {...this.state.cgExampleTabPagination}
+            onChange={this.cgExampleTabPaginationChange}
+          />
+        </div>
+      </div>
+    );
+
+    const dataView = this.state.viewType === "LIST" ? tableView : listView;
+
     // ============== 高级搜索面板 =============== //
     const advanceSearch = (
       <div style={{ width: 200 }}>
@@ -581,29 +642,26 @@ class CgexampleList extends React.Component {
       </div>
     );
 
-
-
     // ============== 组件返回内容 =============== //
     return (
       <div>
+        {/* {JSON.stringify(this.state.selectedRowKeys)} */}
+
         <Row gutter={24}>
           <Col span={12}>
-            <div style={{ paddingTop: 4 }}>
+            <div
+              style={{ paddingTop: 4, cursor: "pointer" }}
+              onClick={this.toggleViewType}
+            >
               {this.state.viewType === "ITEM" ? (
                 <span>
                   <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
                   <Divider type="vertical" />
-                  <UnorderedListOutlined
-                    onClick={this.toggleViewType}
-                    style={{ fontSize: 12 }}
-                  />
+                  <UnorderedListOutlined style={{ fontSize: 14 }} />
                 </span>
               ) : (
                 <span>
-                  <TableOutlined
-                    onClick={this.toggleViewType}
-                    style={{ fontSize: 12 }}
-                  />
+                  <TableOutlined style={{ fontSize: 14 }} />
                   <Divider type="vertical" />
                   <UnorderedListOutlined
                     style={{ fontSize: 16, color: "#1890ff" }}
@@ -613,6 +671,7 @@ class CgexampleList extends React.Component {
             </div>
           </Col>
           <Col span={12}>
+            {/* ======================= 搜索 ======================= */}
             <div className="tabTool">
               <Search
                 placeholder="Key Word"
@@ -663,8 +722,50 @@ class CgexampleList extends React.Component {
           </Col>
         </Row>
 
+        {/* ======================= 复选框操作按钮 ======================= */}
+
+        {this.state.selectedRowKeys && this.state.selectedRowKeys.length > 0 ? (
+          <Alert
+            type="info"
+            message={
+              <div style={{ display: "flex" }}>
+                <div style={{ flex: "1 1 auto" }}>
+                  Selected {this.state.selectedRowKeys.length} items{" "}
+                  <Tooltip title="Clear Selected">
+                    <FontAwesomeIcon
+                      icon="times"
+                      style={{
+                        fontSize: 14,
+                        paddingTop: 2,
+                        marginRight: 8,
+                        color: "#999999",
+                        cursor: "pointer",
+                      }}
+                      onClick={this.clearSelectedKeys}
+                    />
+                  </Tooltip>
+                </div>
+                <div style={{ flex: "0 0 50" }}>
+                  <Tooltip title="Delete Selected">
+                    <Popconfirm
+                      placement="topLeft"
+                      title="Are you confirm delete this record"
+                      onConfirm={this.deleteLogicByCgExampleIds}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Button size="small" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                  </Tooltip>
+                </div>
+              </div>
+            }
+          ></Alert>
+        ) : null}
+
         {dataView}
 
+        {/* ======================= modal窗口 ======================= */}
         <Modal
           title="Cg Example Info"
           visible={this.state.cgExampleFormModalVisible}
@@ -696,15 +797,6 @@ class CgexampleList extends React.Component {
             closeFn={this.closeCgexampleViewModal}
           ></CgexampleView>
         </Modal>
-
-        <FontAwesomeIcon
-          icon={faAnchor}
-          style={{ fontSize: 20, marginRight: 8, color: "#1890ff" }}
-        />
-        <FontAwesomeIcon
-          icon={faBicycle}
-          style={{ fontSize: 20, marginRight: 8, color: "#1890ff" }}
-        />
       </div>
     );
   }
