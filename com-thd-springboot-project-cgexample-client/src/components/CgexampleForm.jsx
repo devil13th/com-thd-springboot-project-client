@@ -102,7 +102,7 @@ class CgexampleForm extends React.Component {
     if (this.state.cgExampleFormStatus === "CREATE") {
       CgexampleApi.addCgExample(this.state.cgExampleData)
         .then((r) => {
-          console.log(r);
+          // console.log(r);
           this.props.closeFn();
           if (this.props.cb) {
             this.props.cb();
@@ -113,7 +113,7 @@ class CgexampleForm extends React.Component {
     } else {
       CgexampleApi.updateCgExample(this.state.cgExampleData)
         .then((r) => {
-          console.log(r);
+          // console.log(r);
           this.props.closeFn();
           if (this.props.cb) {
             this.props.cb();

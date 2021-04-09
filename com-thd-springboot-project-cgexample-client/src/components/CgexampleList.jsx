@@ -51,13 +51,13 @@ class CgexampleList extends React.Component {
     colSpan: 24,
     viewType: "LIST",
     // 查询条件
-    cgExampleQueryCondition: {
+    queryCondition: {
       id: "",
     },
     // loading状态
-    cgExampleTabLoading: false,
+    tabLoading: false,
     // 分页数据
-    cgExampleTabPagination: {
+    tabPagination: {
       current: 1, // 当前页
       pageSize: 10, // 每页条目数
       size: "small", // 尺寸
@@ -71,24 +71,24 @@ class CgexampleList extends React.Component {
       showQuickJumper: true, // 是否有直接跳转页数文本框
     },
     // 表格排序字段和顺序
-    cgExampleTabSort: {
+    tabSort: {
       field: "createTime",
       order: "desc",
     },
     // 表格数据
-    cgExampleTabData: [],
+    tabData: [],
     selectedRowKeys: [],
     // modal cgExampleId
     cgExampleId: "",
     // cgExample编辑modal visible
-    cgExampleFormModalVisible: false,
+    formModalVisible: false,
 
     // cgExample view modal visible
-    cgExampleViewModalVisible: false,
+    viewModalVisible: false,
   };
 
   componentDidMount() {
-    this.queryCgExampleTabData();
+    this.queryTabData();
   }
 
   // 表格选择框改变
@@ -124,7 +124,7 @@ class CgexampleList extends React.Component {
       const filterResult = this.state.selectedRowKeys.filter((item) => {
         return item !== e.target.value;
       });
-      console.log(filterResult);
+      // console.log(filterResult);
       this.setState({
         selectedRowKeys: filterResult,
       });
@@ -133,82 +133,82 @@ class CgexampleList extends React.Component {
 
   // 表格改变事件
   tabChange = (pagination, filters, sorter) => {
-    console.log("pagination", pagination);
-    console.log("filter", filters);
-    console.log("sorter", sorter);
+    // console.log("pagination", pagination);
+    // console.log("filter", filters);
+    // console.log("sorter", sorter);
 
-    const cgExampleTabPagination = {
-      ...this.state.cgExampleTabPagination,
+    const tabPagination = {
+      ...this.state.tabPagination,
       current: pagination.current, // 当前页
       pageSize: pagination.pageSize, // 每页条目数
     };
 
-    let cgExampleTabSort = {};
+    let tabSort = {};
     if (sorter && sorter.order) {
-      cgExampleTabSort = {
+      tabSort = {
         field: sorter.field,
         order: sorter.order.replace("end", ""),
       };
     } else {
-      cgExampleTabSort = this.state.cgExampleTabSort;
+      tabSort = this.state.tabSort;
     }
 
     // 设置分页排序 并查询
     this.setState(
       {
-        cgExampleTabPagination,
-        cgExampleTabSort,
+        tabPagination,
+        tabSort,
       },
-      this.queryCgExampleTabData
+      this.queryTabData
     );
   };
 
   // 分页组件改变事件
-  cgExampleTabPaginationChange = (page, pageSize) => {
-    const cgExampleTabPagination = {
-      ...this.state.cgExampleTabPagination,
+  tabPaginationChange = (page, pageSize) => {
+    const tabPagination = {
+      ...this.state.tabPagination,
       current: page, // 当前页
       pageSize: pageSize, // 每页条目数
     };
 
     this.setState(
       {
-        cgExampleTabPagination,
+        tabPagination,
       },
-      this.queryCgExampleTabData
+      this.queryTabData
     );
   };
   // 查询列表数据 clearPage:是否清除分页信息
-  queryCgExampleTabData = (clearPage) => {
+  queryTabData = (clearPage) => {
     this.setState({
-      cgExampleTabLoading: true,
+      tabLoading: true,
     });
-    let currentPage = this.state.cgExampleTabPagination.current;
+    let currentPage = this.state.tabPagination.current;
     if (clearPage) {
       // 清除当前页信息
       currentPage = 1;
       this.setState({
-        cgExampleTabPagination: {
-          ...this.state.cgExampleTabPagination,
+        tabPagination: {
+          ...this.state.tabPagination,
           current: 1,
         },
       });
     } else {
-      currentPage = this.state.cgExampleTabPagination.current;
+      currentPage = this.state.tabPagination.current;
     }
 
-    let cgExampleQueryCondition = this.state.cgExampleQueryCondition;
-    cgExampleQueryCondition.pageNum = currentPage;
-    cgExampleQueryCondition.pageSize = this.state.cgExampleTabPagination.pageSize;
-    cgExampleQueryCondition.sortField = this.state.cgExampleTabSort.field;
-    cgExampleQueryCondition.sortOrder = this.state.cgExampleTabSort.order;
-    CgexampleApi.queryCgExampleLikeByPage(cgExampleQueryCondition)
+    let queryCondition = this.state.queryCondition;
+    queryCondition.pageNum = currentPage;
+    queryCondition.pageSize = this.state.tabPagination.pageSize;
+    queryCondition.sortField = this.state.tabSort.field;
+    queryCondition.sortOrder = this.state.tabSort.order;
+    CgexampleApi.queryCgExampleLikeByPage(queryCondition)
       .then((r) => {
         this.setState({
-          cgExampleTabLoading: false,
-          cgExampleTabData: r.result.list,
-          cgExampleTabPagination: {
-            ...this.state.cgExampleTabPagination,
+          tabLoading: false,
+          tabData: r.result.list,
+          tabPagination: {
+            ...this.state.tabPagination,
             total: r.result.total,
           },
         });
@@ -216,7 +216,7 @@ class CgexampleList extends React.Component {
       .catch((r) => {
         message.error("error! " + r);
         this.setState({
-          cgExampleTabLoading: false,
+          tabLoading: false,
         });
       });
   };
@@ -274,13 +274,13 @@ class CgexampleList extends React.Component {
   onSearch = (keyWords) => {
     this.setState(
       {
-        cgExampleQueryCondition: {
-          ...this.state.cgExampleQueryCondition,
+        queryCondition: {
+          ...this.state.queryCondition,
           keyWords,
         },
       },
       () => {
-        this.queryCgExampleTabData(true);
+        this.queryTabData(true);
       }
     );
   };
@@ -289,18 +289,18 @@ class CgexampleList extends React.Component {
   resetSearch = () => {
     this.setState(
       {
-        cgExampleQueryCondition: {},
+        queryCondition: {},
       },
       () => {
-        this.queryCgExampleTabData(true);
+        this.queryTabData(true);
       }
     );
   };
 
   keyWordsChange = (e) => {
     this.setState({
-      cgExampleQueryCondition: {
-        ...this.state.cgExampleQueryCondition,
+      queryCondition: {
+        ...this.state.queryCondition,
         keyWords: e.target.value,
       },
     });
@@ -309,13 +309,13 @@ class CgexampleList extends React.Component {
   clearKeyWords = () => {
     this.setState(
       {
-        cgExampleQueryCondition: {
-          // ...this.state.cgExampleQueryCondition,
+        queryCondition: {
+          // ...this.state.queryCondition,
           keyWords: "",
         },
       },
       () => {
-        this.queryCgExampleTabData(true);
+        this.queryTabData(true);
       }
     );
   };
@@ -325,7 +325,7 @@ class CgexampleList extends React.Component {
     CgexampleApi.logicDeleteCgExample(cgExampleId)
       .then((r) => {
         message.info("SUCCESS");
-        this.queryCgExampleTabData();
+        this.queryTabData();
       })
       .catch((r) => {
         message.info("FAILURE");
@@ -342,7 +342,7 @@ class CgexampleList extends React.Component {
           this.setState({
             selectedRowKeys: [],
           });
-          this.queryCgExampleTabData();
+          this.queryTabData();
         })
         .catch((r) => {
           message.error("FAILURE");
@@ -355,14 +355,14 @@ class CgexampleList extends React.Component {
   // 关闭 编辑 modal
   closeCgexampleFormModal = () => {
     this.setState({
-      cgExampleFormModalVisible: false,
+      formModalVisible: false,
       cgExampleId: "",
     });
   };
   // 关闭 视图 modal
   closeCgexampleViewModal = () => {
     this.setState({
-      cgExampleViewModalVisible: false,
+      viewModalVisible: false,
       cgExampleId: "",
     });
   };
@@ -371,11 +371,11 @@ class CgexampleList extends React.Component {
     if (cgExampleId) {
       this.setState({
         cgExampleId: cgExampleId,
-        cgExampleFormModalVisible: true,
+        formModalVisible: true,
       });
     } else {
       this.setState({
-        cgExampleFormModalVisible: true,
+        formModalVisible: true,
       });
     }
   };
@@ -383,7 +383,7 @@ class CgexampleList extends React.Component {
   openCgexampleViewModal = (cgExampleId) => {
     this.setState({
       cgExampleId: cgExampleId,
-      cgExampleViewModalVisible: true,
+      viewModalVisible: true,
     });
   };
 
@@ -410,8 +410,8 @@ class CgexampleList extends React.Component {
   // 双向绑定
   createMode = (v, propName) => {
     this.setState({
-      cgExampleQueryCondition: {
-        ...this.state.cgExampleQueryCondition,
+      queryCondition: {
+        ...this.state.queryCondition,
         [propName]: v,
       },
     });
@@ -420,7 +420,7 @@ class CgexampleList extends React.Component {
   // =============================== render  =============================== //
   render() {
     // 表格字段
-    const cgExampleTabDataColumns = [
+    const tabDataColumns = [
       {
         title: "userName",
         dataIndex: "userName",
@@ -482,12 +482,12 @@ class CgexampleList extends React.Component {
         <div className="block">
           <Table
             rowSelection={rowSelection}
-            loading={this.state.cgExampleTabLoading}
+            loading={this.state.tabLoading}
             rowKey={(record) => record.id}
             size={"small"}
-            columns={cgExampleTabDataColumns}
-            dataSource={this.state.cgExampleTabData}
-            pagination={this.state.cgExampleTabPagination}
+            columns={tabDataColumns}
+            dataSource={this.state.tabData}
+            pagination={this.state.tabPagination}
             onChange={this.tabChange}
           />
         </div>
@@ -507,8 +507,8 @@ class CgexampleList extends React.Component {
             padding: 4,
           }}
         >
-          {this.state.cgExampleTabData.length > 0 ? (
-            this.state.cgExampleTabData.map((item) => {
+          {this.state.tabData.length > 0 ? (
+            this.state.tabData.map((item) => {
               return (
                 <div style={{ flex: "0 0 20%", padding: 8 }} key={item.id}>
                   <div className="block">
@@ -549,8 +549,8 @@ class CgexampleList extends React.Component {
         <div style={{ textAlign: "right" }}>
           <Pagination
             style={{ marginTop: 8 }}
-            {...this.state.cgExampleTabPagination}
-            onChange={this.cgExampleTabPaginationChange}
+            {...this.state.tabPagination}
+            onChange={this.tabPaginationChange}
           />
         </div>
       </div>
@@ -568,7 +568,7 @@ class CgexampleList extends React.Component {
               <dd>
                 <Input
                   size={this.state.inputSize}
-                  value={this.state.cgExampleQueryCondition.id}
+                  value={this.state.queryCondition.id}
                   onChange={(e) => {
                     this.createMode(e.target.value, "id");
                   }}
@@ -582,7 +582,7 @@ class CgexampleList extends React.Component {
               <dd>
                 <Input
                   size={this.state.inputSize}
-                  value={this.state.cgExampleQueryCondition.userName}
+                  value={this.state.queryCondition.userName}
                   onChange={(e) => {
                     this.createMode(e.target.value, "userName");
                   }}
@@ -596,7 +596,7 @@ class CgexampleList extends React.Component {
               <dd>
                 <InputNumber
                   size={this.state.inputSize}
-                  value={this.state.cgExampleQueryCondition.userAge}
+                  value={this.state.queryCondition.userAge}
                   onChange={(v) => {
                     this.createMode(v, "userAge");
                   }}
@@ -614,9 +614,9 @@ class CgexampleList extends React.Component {
                     this.createMode(dataStr, "userBirthday");
                   }}
                   value={
-                    this.state.cgExampleQueryCondition.userBirthday
+                    this.state.queryCondition.userBirthday
                       ? moment(
-                          this.state.cgExampleQueryCondition.userBirthday,
+                          this.state.queryCondition.userBirthday,
                           "YYYY-MM-DD"
                         )
                       : null
@@ -631,7 +631,7 @@ class CgexampleList extends React.Component {
           <Button
             style={{ marginRight: 8 }}
             onClick={() => {
-              this.queryCgExampleTabData(true);
+              this.queryTabData(true);
             }}
             icon={<SearchOutlined />}
           >
@@ -684,7 +684,7 @@ class CgexampleList extends React.Component {
                     style={{ cursor: "pointer", fontSize: 12, color: "#aaa" }}
                   />
                 }
-                value={this.state.cgExampleQueryCondition.keyWords}
+                value={this.state.queryCondition.keyWords}
                 enterButton
               />
 
@@ -768,7 +768,7 @@ class CgexampleList extends React.Component {
         {/* ======================= modal窗口 ======================= */}
         <Modal
           title="Cg Example Info"
-          visible={this.state.cgExampleFormModalVisible}
+          visible={this.state.formModalVisible}
           footer={null}
           width={"100%"}
           destroyOnClose={true}
@@ -779,13 +779,13 @@ class CgexampleList extends React.Component {
             cgExampleId={this.state.cgExampleId}
             canEdit={true}
             closeFn={this.closeCgexampleFormModal}
-            cb={this.queryCgExampleTabData}
+            cb={this.queryTabData}
           ></CgexampleForm>
         </Modal>
 
         <Modal
           title="Cg Example Info"
-          visible={this.state.cgExampleViewModalVisible}
+          visible={this.state.viewModalVisible}
           width={"100%"}
           destroyOnClose={true}
           onCancel={this.closeCgexampleViewModal}

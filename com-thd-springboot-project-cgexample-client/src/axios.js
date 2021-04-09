@@ -3,7 +3,7 @@ import { message } from 'antd';
 
 axios.interceptors.response.use(function (response) {
 
-    console.log('--res success--',response)
+    // console.log('--res success--',response)
     // 对响应数据做点什么
 
     if(response.data.code === '-1'){
@@ -14,7 +14,7 @@ axios.interceptors.response.use(function (response) {
    
     
   }, function (error) {
-    console.log('--req error--',error)
+    // console.log('--req error--',error)
 
     message.error('Error:'+ error);
     // 对响应错误做点什么

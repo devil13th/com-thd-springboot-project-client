@@ -26,7 +26,7 @@ class IndexLayout extends React.Component {
   };
 
   onCollapse = collapsed => {
-    console.log(collapsed);
+    // console.log(collapsed);
     this.setState({ collapsed });
   };
 
@@ -60,7 +60,7 @@ class IndexLayout extends React.Component {
             </div>
           </Content> 
           <Footer style={{ textAlign: "center" }}>
-            Activiti Process Management System
+            Code Generator Example
           </Footer>
         </Layout>
       </Layout>
