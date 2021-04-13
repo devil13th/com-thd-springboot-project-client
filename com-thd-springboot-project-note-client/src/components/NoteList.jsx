@@ -1,401 +1,873 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes, fatrash } from "@fortawesome/fontawesome-free-solid";
+
 import {
-  Divider,
-  Table,
-  Input,
-  Button,
-  Switch,
-  Tooltip,
-  Tree,
+  Menu,
   Modal,
+  Table,
+  Button,
+  Input,
+  Alert,
+  InputNumber,
+  Dropdown,
+  Space,
+  Checkbox,
+  Tooltip,
+  message,
+  Divider,
+  Pagination,
+  Popconfirm,
   Row,
   Col,
-  Pagination
+  Popover,
+  Empty,
+  Card,
+  DatePicker,
 } from "antd";
-import NoteDetail from "./NoteDetail";
 import NoteApi from "@/api/NoteApi";
 import DateUtils from "@/tools/DateUtils";
+import NoteForm from "./NoteForm";
+import NoteView from "./NoteView";
+import moment from "moment";
 import {
-  CheckOutlined,
-  CloseOutlined,
-  EditOutlined,
-  FilterOutlined,
-  AudioOutlined,
-  BookOutlined,
-  MenuOutlined,
-  UnorderedListOutlined,
   SearchOutlined,
+  UpOutlined,
+  EyeOutlined,
+  CloseCircleFilled,
+  TableOutlined,
+  CloseOutlined,
+  UnorderedListOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  PlusOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
+
 const { Search } = Input;
-const { DirectoryTree } = Tree;
 class NoteList extends React.Component {
   state = {
-    treeVisible: false,
-    noteVisible: false,
-    mode: "LIST", // DETAIL LIST
-    queryCondition: {},
-    tableLoading: false,
-    tableData: [],
-    pagination: {
-      pageNum: 1,
-      pageSize: 10,
-      pageSizeOptions: [5, 10, 15, 50, 100],
+    advanceSearchVisible: false,
+    colSpan: 24,
+    viewType: "LIST",
+    // 查询条件
+    queryCondition: {
+      noteId: "",
+    },
+    // loading状态
+    tabLoading: false,
+    // 分页数据
+    tabPagination: {
+      current: 1, // 当前页
+      pageSize: 10, // 每页条目数
+      size: "small", // 尺寸
+      total: 0, // 总条目数
+      pageSizeOptions: [5, 10, 15, 50, 100], // 条目数选项
+      // 文本
       showTotal: (total, range) => {
         return `${total} items`;
       },
-      showSizeChanger: true,
-      showQuickJumper: true,
+      showSizeChanger: true, // 是否展示修改条目数的下拉菜单
+      showQuickJumper: true, // 是否有直接跳转页数文本框
     },
-    // 排序
-    sorter: {
-      field: "create_time",
-      order: "descend",
+    // 表格排序字段和顺序
+    tabSort: {
+      field: "createTime",
+      order: "desc",
     },
+    // 表格数据
+    tabData: [],
+    selectedRowKeys: [],
+    // modal noteId
+    noteId: "",
+    // note编辑modal visible
+    formModalVisible: false,
+
+    // note view modal visible
+    viewModalVisible: false,
   };
 
-  onSearch = (k) => {
+  componentDidMount() {
+    this.queryTabData();
+  }
+
+  // 表格选择框改变
+  onSelectChange = (selectedRowKeys) => {
+    // console.log('selectedRowKeys changed: ', selectedRowKeys);
+    this.setState({ selectedRowKeys });
+  };
+  // 清除已选择的选择框
+  clearSelectedKeys = () => {
+    this.setState({ selectedRowKeys: [] });
+  };
+
+  // detail视图中的checkbox checked属性初始化
+  checkedInit = (id) => {
+    return (
+      this.state.selectedRowKeys.find((item) => {
+        return item === id;
+      }) !== undefined
+    );
+  };
+  // detail视图中的checkbox checked事件
+  checkboxChange = (e) => {
+    if (e.target.checked) {
+      const f = this.state.selectedRowKeys.find((item) => {
+        return item === e.target.value;
+      });
+      if (f === undefined) {
+        this.setState({
+          selectedRowKeys: [...this.state.selectedRowKeys, e.target.value],
+        });
+      }
+    } else {
+      const filterResult = this.state.selectedRowKeys.filter((item) => {
+        return item !== e.target.value;
+      });
+      // console.log(filterResult);
+      this.setState({
+        selectedRowKeys: filterResult,
+      });
+    }
+  };
+
+  // 表格改变事件
+  tabChange = (pagination, filters, sorter) => {
+    // console.log("pagination", pagination);
+    // console.log("filter", filters);
+    // console.log("sorter", sorter);
+
+    const tabPagination = {
+      ...this.state.tabPagination,
+      current: pagination.current, // 当前页
+      pageSize: pagination.pageSize, // 每页条目数
+    };
+
+    let tabSort = {};
+    if (sorter && sorter.order) {
+      tabSort = {
+        field: sorter.field,
+        order: sorter.order.replace("end", ""),
+      };
+    } else {
+      tabSort = this.state.tabSort;
+    }
+
+    // 设置分页排序 并查询
     this.setState(
       {
-        queryCondition: { ...this.state.queryCondition, keyWord: k },
+        tabPagination,
+        tabSort,
       },
-      this.search
+      this.queryTabData
     );
   };
 
-  toggleMode = () => {
-    if (!this.state.mode || this.state.mode === "LIST") {
-      this.setState({ mode: "DETAIL" });
-    } else {
-      this.setState({ mode: "LIST" });
-    }
-  };
-  onChange = (value) => {
-    console.log("onChange ", value);
-    this.setState({ value });
-  };
-  openNoteModal = () => {
-    this.setState({ noteVisible: true });
-  };
-  closeNoteModal = () => {
-    this.setState({ noteVisible: false });
-  };
-  showModal = () => {
-    this.setState({ treeVisible: true });
-  };
-
-  handleOk = () => {
-    this.setState({ treeVisible: false });
-  };
-
-  handleCancel = () => {
-    this.setState({ treeVisible: false });
-  };
-
-  onSelect = (keys, info) => {
-    console.log("Trigger Select", keys, info);
-  };
-
-  onExpand = () => {
-    console.log("Trigger Expand");
-  };
-
-  search = () => {
-    this.queryList(true);
-  };
-
-  queryList = (clearPage) => {
-    console.log("===", this.state.pagination);
-    if (clearPage) {
-      // 清除分页
-      this.setState(
-        {
-          pagination: {
-            showTotal: (total, range) => {
-              return `${total} items`;
-            },
-            showSizeChanger: true,
-            showQuickJumper: true,
-            ...this.state.pagination,
-            pageNum: 1,
-          },
-        },
-        this.basicQuery
-      );
-    } else {
-      this.basicQuery();
-    }
-  };
-
-  // 基础查询
-  basicQuery = () => {
-    const _this = this;
-    const queryCondition = {
-      pageNum: this.state.pagination.pageNum,
-      pageSize: this.state.pagination.pageSize,
-      total: this.state.pagination.total,
-      sortField: this.state.sorter.field,
-      sortOrder: this.state.sorter.order.replace("end", ""),
-      keyWords: this.state.keyWords,
-      ...this.state.queryObj,
+  // 分页组件改变事件
+  tabPaginationChange = (page, pageSize) => {
+    const tabPagination = {
+      ...this.state.tabPagination,
+      current: page, // 当前页
+      pageSize: pageSize, // 每页条目数
     };
-    this.setState({ tableLoading: true });
 
-    NoteApi.findNotePage(queryCondition).then((result) => {
-      console.log("--||-", result);
-      const r = result.data;
+    this.setState(
+      {
+        tabPagination,
+      },
+      this.queryTabData
+    );
+  };
+  // 查询列表数据 clearPage:是否清除分页信息
+  queryTabData = (clearPage) => {
+    this.setState({
+      tabLoading: true,
+    });
+    let currentPage = this.state.tabPagination.current;
+    if (clearPage) {
+      // 清除当前页信息
+      currentPage = 1;
       this.setState({
-        tableData: r.result.list,
-        tableLoading: false,
-        pagination: {
-          ...this.state.pagination,
-          showTotal: (total, range) => {
-            return `${total} items`;
-          },
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageNum: r.result.pageNum,
-          pageSize: r.result.pageSize,
-          total: r.result.total,
+        tabPagination: {
+          ...this.state.tabPagination,
+          current: 1,
         },
       });
+    } else {
+      currentPage = this.state.tabPagination.current;
+    }
+
+    let queryCondition = this.state.queryCondition;
+    queryCondition.pageNum = currentPage;
+    queryCondition.pageSize = this.state.tabPagination.pageSize;
+    queryCondition.sortField = this.state.tabSort.field;
+    queryCondition.sortOrder = this.state.tabSort.order;
+    NoteApi.queryNoteLikeByPage(queryCondition)
+      .then((r) => {
+        this.setState({
+          tabLoading: false,
+          tabData: r.result.list,
+          tabPagination: {
+            ...this.state.tabPagination,
+            total: r.result.total,
+          },
+        });
+      })
+      .catch((r) => {
+        message.error("error! " + r);
+        this.setState({
+          tabLoading: false,
+        });
+      });
+  };
+
+  // 操作按钮的下拉菜单
+  createOperate = (record) => {
+    const menu = (
+      <Menu>
+        <Menu.Item key="1" icon={<DeleteOutlined />}>
+          <Popconfirm
+            placement="topLeft"
+            title="Are you confirm delete this record"
+            onConfirm={() => {
+              this.logicDeleteNote(record.noteId);
+            }}
+            okText="Yes"
+            cancelText="No"
+          >
+            Delete
+          </Popconfirm>
+        </Menu.Item>
+        <Menu.Item
+          key="2"
+          onClick={() => {
+            // message.info(JSON.stringify(record));
+            this.openNoteViewModal(record.noteId);
+          }}
+          icon={<EyeOutlined />}
+        >
+          Data View
+        </Menu.Item>
+      </Menu>
+    );
+    return (
+      <div>
+        <a
+          className="ant-dropdown-link"
+          onClick={() => {
+            this.openNoteFormModal(record.noteId);
+          }}
+        >
+          Edit
+        </a>
+
+        <Dropdown overlay={menu}>
+          <Button type="link">
+            <MoreOutlined />
+          </Button>
+        </Dropdown>
+      </div>
+    );
+  };
+
+  // keywords 搜索
+  onSearch = (keyWords) => {
+    this.setState(
+      {
+        queryCondition: {
+          ...this.state.queryCondition,
+          keyWords,
+        },
+      },
+      () => {
+        this.queryTabData(true);
+      }
+    );
+  };
+
+  // 重置搜索条件
+  resetSearch = () => {
+    this.setState(
+      {
+        queryCondition: {},
+      },
+      () => {
+        this.queryTabData(true);
+      }
+    );
+  };
+
+  keyWordsChange = (e) => {
+    this.setState({
+      queryCondition: {
+        ...this.state.queryCondition,
+        keyWords: e.target.value,
+      },
     });
   };
 
-  // 分页/排序 事件处理
-  handleTableChange = (pagination, filters, sorter) => {
-    const st = {
-      pagination: {
-        showTotal: (total, range) => {
-          return `${total} items`;
+  clearKeyWords = () => {
+    this.setState(
+      {
+        queryCondition: {
+          // ...this.state.queryCondition,
+          keyWords: "",
         },
-        showSizeChanger: true,
-        showQuickJumper: true,
-        pageNum: pagination.current,
-        pageSize: pagination.pageSize,
-        total: this.state.pagination.total,
       },
-    };
-    if (sorter.field && sorter.order) {
-      st.sorter = {
-        field: sorter.field,
-        order: sorter.order,
-      };
-    } else {
-      st.sorter = {
-        field: "",
-        order: "",
-      };
-    }
-    this.setState(st, this.queryList);
+      () => {
+        this.queryTabData(true);
+      }
+    );
   };
 
-  render() {
-    const lSpan = this.state.mode === "DETAIL" ? 10 : 24;
-    const rSpan = this.state.mode === "DETAIL" ? 14 : 0;
+  // 删除Note
+  logicDeleteNote = (noteId) => {
+    NoteApi.logicDeleteNote(noteId)
+      .then((r) => {
+        message.info("SUCCESS");
+        this.queryTabData();
+      })
+      .catch((r) => {
+        message.info("FAILURE");
+      });
+  };
 
-    const columns = [
+  // 批量删除Note
+  deleteLogicByNoteIds = () => {
+    if (this.state.selectedRowKeys.length > 0) {
+      NoteApi.deleteLogicByNoteIds(this.state.selectedRowKeys)
+        .then((r) => {
+          message.info("SUCCESS");
+
+          this.setState({
+            selectedRowKeys: [],
+          });
+          this.queryTabData();
+        })
+        .catch((r) => {
+          message.error("FAILURE");
+        });
+    } else {
+      message.error("Please Select A Item At Least");
+    }
+  };
+
+  // 关闭 编辑 modal
+  closeNoteFormModal = () => {
+    this.setState({
+      formModalVisible: false,
+      noteId: "",
+    });
+  };
+  // 关闭 视图 modal
+  closeNoteViewModal = () => {
+    this.setState({
+      viewModalVisible: false,
+      noteId: "",
+    });
+  };
+  // 打开 编辑 modal
+  openNoteFormModal = (noteId) => {
+    if (noteId) {
+      this.setState({
+        noteId: noteId,
+        formModalVisible: true,
+      });
+    } else {
+      this.setState({
+        formModalVisible: true,
+      });
+    }
+  };
+  // 打开 视图 modal
+  openNoteViewModal = (noteId) => {
+    this.setState({
+      noteId: noteId,
+      viewModalVisible: true,
+    });
+  };
+
+  // 切换视图类型
+  toggleViewType = () => {
+    if (this.state.viewType === "LIST") {
+      this.setState({
+        viewType: "ITEM",
+      });
+    } else {
+      this.setState({
+        viewType: "LIST",
+      });
+    }
+  };
+
+  // 高级搜索显示/隐藏 回调
+  handleAdvanceSearchVisibleChange = (b) => {
+    this.setState({
+      advanceSearchVisible: b,
+    });
+  };
+
+  // 双向绑定
+  createMode = (v, propName) => {
+    this.setState({
+      queryCondition: {
+        ...this.state.queryCondition,
+        [propName]: v,
+      },
+    });
+  };
+
+  // =============================== render  =============================== //
+  render() {
+    // 表格字段
+    const tabDataColumns = [
       {
-        title: "Title",
-        dataIndex: "title",
-        key: "title",
+        title: "classify",
+        dataIndex: "classify",
+        key: "classify",
+        sorter: true,
       },
       {
-        title: "Expire",
+        title: "title",
+        dataIndex: "title",
+        key: "title",
+        sorter: true,
+      },
+      {
+        title: "content",
+        dataIndex: "content",
+        key: "content",
+        sorter: true,
+      },
+      {
+        title: "expireDate",
         dataIndex: "expireDate",
         key: "expireDate",
-        render: (text) => {
-          if (text) {
-            return DateUtils.formatToDate(text);
-          } else {
-            return "";
-          }
+        sorter: true,
+        render: (text, record, index) => {
+          return DateUtils.formatToDate(text);
+        },
+      },
+      {
+        title: "alarmDays",
+        dataIndex: "alarmDays",
+        key: "alarmDays",
+        sorter: true,
+      },
+      {
+        title: "Operate",
+        key: "operate",
+        render: (text, record, index) => {
+          return this.createOperate(record);
         },
       },
     ];
 
-    const treeData = [
-      {
-        title: "parent 0",
-        key: "0-0",
-        children: [
-          { title: "leaf 0-0", key: "0-0-0", isLeaf: true },
-          { title: "leaf 0-1", key: "0-0-1", isLeaf: true },
-        ],
-      },
-      {
-        title: "parent 1",
-        key: "0-1",
-        children: [
-          { title: "leaf 1-0", key: "0-1-0", isLeaf: true },
-          { title: "leaf 1-1", key: "0-1-1", isLeaf: true },
-        ],
-      },
-    ];
+    // 复选框
+    const { selectedRowKeys } = this.state;
+    const rowSelection = {
+      selectedRowKeys,
+      // 为避免远程分页会之前选择的数据
+      preserveSelectedRowKeys: true,
+      onChange: this.onSelectChange,
+      selections: [
+        {
+          key: "clearAll",
+          text: "Clear All",
+          onSelect: (changableRowKeys) => {
+            this.setState({ selectedRowKeys: [] });
+          },
+        },
+      ],
+    };
 
-    const controlBton =
-      this.state.mode === "LIST" ? (
-        <Tooltip title="List Mode">
-          <Button
-            onClick={this.toggleMode}
-            size={"small"}
-            icon={<MenuOutlined />}
-            style={{ marginRight: "4px" }}
-          />
-        </Tooltip>
-      ) : (
-        <Tooltip title="Detail Mode">
-          <Button
-            onClick={this.toggleMode}
-            size={"small"}
-            icon={<UnorderedListOutlined />}
-            style={{ marginRight: "4px" }}
-          />
-        </Tooltip>
-      );
+    // ======================= 数据展示内容 =======================
 
-    const dataList =
-      this.state.mode === "LIST" ? (
-        <Table
-          onChange={this.handleTableChange}
-          style={{ marginTop: "4px" }}
-          size={"small"}
-          dataSource={this.state.tableData}
-          columns={columns}
-          pagination={this.state.pagination}
-          loading={this.state.tableLoading}
-          rowKey={(record) => {
-            return record.noteId;
-          }}
-        />
-      ) : (
-        <div>
-          {this.state.tableData.map((item) => {
-            return (
-              <div
-                key={item.noteId}
-                className="block"
-                style={{ marginTop: "8px" }}
-              >
-                <div style={{ display: "flex" }}>
-                  <div style={{ fontWeight: "bold", flex: "0 0 60px" }}>
-                    Title
-                  </div>
-                  <div style={{ flex: "0 0 auto" ,color:'#3c8dbc'}}>{item.title}</div>
-                </div>
-                <div className="divider"></div>
-                <div style={{ display: "flex" }}>
-                  <div style={{ fontWeight: "bold", flex: "1 1 auto" }}>
-                    Expire
-                  </div>
-                  <div style={{ flex: "1 1 100"  ,color:'#3c8dbc'}}>
-                    {DateUtils.formatToDate(item.expireDate)}
-                  </div>
-                </div>
-                <div className="divider"></div>
-                {item.age}
-                <div style={{ textAlign: "right", marginTop: "8px" }}>
-                  <EditOutlined
-                    style={{ color: "#3c8dbc", cursor: "pointer" }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-          <Pagination style={{marginTop:'8px'}} size={'small'} {...this.state.pagination}/>
+    const tableView = (
+      <div
+        style={{
+          background: "#ecf0f5",
+          borderRadius: 3,
+          padding: 8,
+        }}
+      >
+        <div className="block">
+          <Table
+            rowSelection={rowSelection}
+            loading={this.state.tabLoading}
+            rowKey={(record) => record.noteId}
+            size={"small"}
+            columns={tabDataColumns}
+            dataSource={this.state.tabData}
+            pagination={this.state.tabPagination}
+            onChange={this.tabChange}
+          />
         </div>
-      );
+      </div>
+    );
 
-    return (
-      <div style={{ background: "#ecf0f5" }}>
-        <Row gutter={24}>
-          <Col span={lSpan}>
-            <div style={{ display: "flex" }}>
-              <div style={{ flex: "0 0 110px" }}>
-                <Tooltip title="Classify Management">
-                  <Button
-                    size={"small"}
-                    icon={<BookOutlined />}
-                    style={{ marginRight: "4px" }}
-                  />
-                </Tooltip>
-                {controlBton}
-                <Tooltip title="Create">
-                  <Button
-                    type="primary"
-                    size={"small"}
-                    icon={<EditOutlined />}
-                    style={{ marginRight: "4px" }}
-                    onClick={this.openNoteModal}
-                  />
-                </Tooltip>
-              </div>
-              <div style={{ flex: "2 2 auto" }}>
-                {/* <div className="block" style={{width:200}}>1234</div> */}
-              </div>
-              <div style={{ flex: "0 0 200px", textAlign: "right" }}>
-                <Tooltip title="Query Todo Only ?">
-                  <Switch
-                    style={{ marginRight: 8 }}
-                    size={"small"}
-                    checkedChildren={<CheckOutlined />}
-                    unCheckedChildren={<CloseOutlined />}
-                    defaultChecked
-                  />
-                </Tooltip>
-
-                <Tooltip title="Classify Filter">
-                  <Button
-                    onClick={this.showModal}
-                    size={"small"}
-                    icon={<FilterOutlined />}
-                    style={{ marginRight: "4px" }}
-                  />
-                </Tooltip>
-
-                <Search
-                  placeholder="key words"
-                  onSearch={this.onSearch}
-                  enterButton
-                  size={"small"}
-                  style={{ width: 120 }}
-                />
-              </div>
-            </div>
-
-            {dataList}
-          </Col>
-          <Col span={rSpan}>xxxxx</Col>
-        </Row>
-        <Modal
-          title="Classify Filter"
-          visible={this.state.treeVisible}
-          onOk={this.handleOk}
-          onCancel={this.handleCancel}
-          destroyOnClose={true}
+    const listView = (
+      <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+            background: "#ecf0f5",
+            borderRadius: 3,
+            padding: 8,
+          }}
         >
-          <i>Press Ctrl Can Select Mutiple Classify</i>
-          <DirectoryTree
-            multiple
-            defaultExpandAll
-            onSelect={this.onSelect}
-            onExpand={this.onExpand}
-            treeData={treeData}
+          {this.state.tabData.length > 0 ? (
+            this.state.tabData.map((item) => {
+              return (
+                <div style={{ flex: "0 0 20%", padding: '0px 8px 8px 0px' }} key={item.noteId}>
+                  <div className="block">
+                    <div className="title">{item.noteId}</div>
+
+                    <dl className="profile">
+                      <dt>classify</dt>
+                      <dd>{item.classify}</dd>
+                    </dl>
+
+                    <dl className="profile">
+                      <dt>title</dt>
+                      <dd>{item.title}</dd>
+                    </dl>
+
+                    <dl className="profile">
+                      <dt>content</dt>
+                      <dd>{item.content}</dd>
+                    </dl>
+
+                    <dl className="profile">
+                      <dt>expireDate</dt>
+                      <dd>{DateUtils.formatToDate(item.expireDate)}</dd>
+                    </dl>
+
+                    <dl className="profile">
+                      <dt>alarmDays</dt>
+                      <dd>{item.alarmDays}</dd>
+                    </dl>
+
+                    <div className="divider"></div>
+                    <div style={{ display: "flex" }}>
+                      <div style={{ flex: "1 1 auto", paddingTop: 4 }}>
+                        <Checkbox
+                          checked={this.checkedInit(item.noteId)}
+                          value={item.noteId}
+                          onChange={this.checkboxChange}
+                        />
+                      </div>
+                      <div style={{ flex: "0 0 75px" }}>
+                        {this.createOperate(item)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div
+              style={{
+                padding: 8,
+                textAlign: "center",
+                background: "#fff",
+                width: "100%",
+              }}
+            >
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            </div>
+          )}
+        </div>
+
+        <div style={{ textAlign: "right" }}>
+          <Pagination
+            style={{ marginTop: 8 }}
+            {...this.state.tabPagination}
+            onChange={this.tabPaginationChange}
           />
+        </div>
+      </div>
+    );
+
+    const dataView = this.state.viewType === "LIST" ? tableView : listView;
+
+    // ============== 高级搜索面板 =============== //
+    const advanceSearch = (
+      <div style={{ width: 200 }}>
+        <Row gutter={24}>
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>ID</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.queryCondition.noteId}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "noteId");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>classify</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.queryCondition.classify}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "classify");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>title</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.queryCondition.title}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "title");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>content</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.queryCondition.content}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "content");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>expireDate</dt>
+              <dd>
+                <DatePicker
+                  size={this.state.inputSize}
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "expireDate");
+                  }}
+                  value={
+                    this.state.queryCondition.expireDate
+                      ? moment(
+                          this.state.queryCondition.expireDate,
+                          "YYYY-MM-DD"
+                        )
+                      : null
+                  }
+                />
+              </dd>
+            </dl>
+          </Col>
+
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dt>alarmDays</dt>
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.queryCondition.alarmDays}
+                  onChange={(e) => {
+                    this.createMode(e.target.value, "alarmDays");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+        </Row>
+        <Divider style={{ margin: "8px 0px" }}></Divider>
+        <div style={{ textAlign: "center" }}>
+          <Button
+            style={{ marginRight: 8 }}
+            onClick={() => {
+              this.queryTabData(true);
+            }}
+            icon={<SearchOutlined />}
+          >
+            Search
+          </Button>
+          <Button onClick={this.resetSearch}>Reset</Button>
+        </div>
+      </div>
+    );
+
+    // ============== 组件返回内容 =============== //
+    return (
+      <div>
+        {/* {JSON.stringify(this.state.selectedRowKeys)} */}
+
+        <Row gutter={24}>
+          <Col span={12}>
+            <div
+              style={{ paddingTop: 4, cursor: "pointer" }}
+              onClick={this.toggleViewType}
+            >
+              {this.state.viewType === "ITEM" ? (
+                <span>
+                  <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
+                  <Divider type="vertical" />
+                  <UnorderedListOutlined style={{ fontSize: 14 }} />
+                </span>
+              ) : (
+                <span>
+                  <TableOutlined style={{ fontSize: 14 }} />
+                  <Divider type="vertical" />
+                  <UnorderedListOutlined
+                    style={{ fontSize: 16, color: "#1890ff" }}
+                  />
+                </span>
+              )}
+            </div>
+          </Col>
+          <Col span={12}>
+            {/* ======================= 搜索 ======================= */}
+            <div className="tabTool">
+              <Search
+                placeholder="Key Word"
+                style={{ width: 200, marginRight: 8 }}
+                onSearch={this.onSearch}
+                onChange={this.keyWordsChange}
+                suffix={
+                  <CloseCircleFilled
+                    onClick={this.clearKeyWords}
+                    style={{ cursor: "pointer", fontSize: 12, color: "#aaa" }}
+                  />
+                }
+                value={this.state.queryCondition.keyWords}
+                enterButton
+              />
+
+              <Popover
+                content={advanceSearch}
+                trigger="click"
+                title="Advance Search"
+                visible={this.state.advanceSearchVisible}
+                onVisibleChange={this.handleAdvanceSearchVisibleChange}
+              >
+                <Button
+                  type="link"
+                  icon={
+                    this.state.advanceSearchVisible ? (
+                      <UpOutlined />
+                    ) : (
+                      <DownOutlined />
+                    )
+                  }
+                >
+                  Advance
+                </Button>
+              </Popover>
+
+              <Tooltip title="Create">
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    this.openNoteFormModal();
+                  }}
+                ></Button>
+              </Tooltip>
+            </div>
+          </Col>
+        </Row>
+
+        {/* ======================= 复选框操作按钮 ======================= */}
+
+        {this.state.selectedRowKeys && this.state.selectedRowKeys.length > 0 ? (
+          <Alert
+            type="info"
+            message={
+              <div style={{ display: "flex" }}>
+                <div style={{ flex: "1 1 auto" }}>
+                  Selected {this.state.selectedRowKeys.length} items{" "}
+                  <Tooltip title="Clear Selected">
+                    <FontAwesomeIcon
+                      icon="times"
+                      style={{
+                        fontSize: 14,
+                        paddingTop: 2,
+                        marginRight: 8,
+                        color: "#999999",
+                        cursor: "pointer",
+                      }}
+                      onClick={this.clearSelectedKeys}
+                    />
+                  </Tooltip>
+                </div>
+                <div style={{ flex: "0 0 50" }}>
+                  <Tooltip title="Delete Selected">
+                    <Popconfirm
+                      placement="topLeft"
+                      title="Are you confirm delete this record"
+                      onConfirm={this.deleteLogicByNoteIds}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Button size="small" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                  </Tooltip>
+                </div>
+              </div>
+            }
+          ></Alert>
+        ) : null}
+
+        {dataView}
+
+        {/* ======================= modal窗口 ======================= */}
+        <Modal
+          title="Note Information"
+          visible={this.state.formModalVisible}
+          footer={null}
+          width={"100%"}
+          destroyOnClose={true}
+          onCancel={this.closeNoteFormModal}
+          maskClosable={false}
+        >
+          <NoteForm
+            noteId={this.state.noteId}
+            canEdit={true}
+            closeFn={this.closeNoteFormModal}
+            cb={this.queryTabData}
+          ></NoteForm>
         </Modal>
 
         <Modal
-          title="Note"
-          visible={this.state.noteVisible}
-          onOk={this.closeNoteModal}
-          onCancel={this.closeNoteModal}
-          width={'95%'}
+          title="Edit Note"
+          visible={this.state.viewModalVisible}
+          width={"100%"}
           destroyOnClose={true}
+          onCancel={this.closeNoteViewModal}
+          maskClosable={false}
         >
-          <NoteDetail></NoteDetail>
+          <NoteView
+            noteId={this.state.noteId}
+            canEdit={true}
+            closeFn={this.closeNoteViewModal}
+          ></NoteView>
         </Modal>
       </div>
     );
   }
 }
-
 export default NoteList;

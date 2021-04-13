@@ -26,7 +26,7 @@ class IndexLayout extends React.Component {
   };
 
   onCollapse = collapsed => {
-    console.log(collapsed);
+    // console.log(collapsed);
     this.setState({ collapsed });
   };
 
@@ -40,39 +40,26 @@ class IndexLayout extends React.Component {
             ____
           </div>
           <Menu theme="dark" defaultSelectedKeys={["1"]} mode="inline">
-            <Menu.Item key="noteList" icon={<SlidersOutlined />}>
-              <Link to="/noteList" >Note b. </Link>
+          <Menu.Item key="noteList" icon={<SlidersOutlined />}>
+              <Link to="/noteList" >Note </Link>
             </Menu.Item>
-            <Menu.Item key="processInstanceList" icon={<SnippetsOutlined />}>
-              <Link to="/processInstanceList">Instance Mgmt.</Link>
-            </Menu.Item>
-            <Menu.Item key="taskList" icon={<UnorderedListOutlined />}>
-              <Link to="/taskList">Task List</Link>
-            </Menu.Item>
-            <Menu.Item key="TaskHisList" icon={<OrderedListOutlined />}>
-              <Link to="/TaskHisList">Task His List</Link>
-            </Menu.Item>
-            <Menu.Item key="ProcessVariable" icon={<FileOutlined />}>
-              <Link to="/ProcessVariable">Process Var</Link>
-            </Menu.Item>
-          </Menu>
+            </Menu>
         </Sider>
         <Layout className="site-layout">
-          <Content style={{ margin: "16px 16px 0px" }}>
+          <Content style={{ margin: "8px 8px 0px" }}>
             <div
               className="site-layout-background"
-              style={{ padding: "8px 24px", minHeight: 360 }}
+              style={{ padding: "8px 8px", minHeight: 360,background:'#fff' }}
             >
               <Route
                 path="/noteList"
                 exact
                 component={NoteList}
-              ></Route>
-              
+              ></Route>        
             </div>
           </Content> 
           <Footer style={{ textAlign: "center" }}>
-            Activiti Process Management System
+            Code Generator Example
           </Footer>
         </Layout>
       </Layout>

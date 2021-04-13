@@ -45,9 +45,85 @@ code {
   background:#fff;
 }
 
+.block .title{
+  font-size:12px;
+  font-weight:bold;
+  line-height:24px;
+  padding-left:1em;
+  border-bottom:1px solid #f4f4f4;
+  padding-bottom:4px;
+}
+
+.block dl.profile{ 
+  display:flex;
+  margin:0px;
+  padding:0px;
+  margin-top:4px;
+}
+
+.block dl.profile dt{
+  color:#3c8dbc;
+  font-size:12px;
+  margin:0px;
+  padding:0px;
+  padding-left:8px;
+  line-height:20px;
+  flex: 0 0 100px;
+}
+
+.block dl.profile dd{
+  font-size:10px;
+  color:#3c8dbc;
+  margin:0px;padding:0px;
+  flex:1 1 auto;
+  line-height:20px;
+  padding-right:8px;
+  text-align:right;
+}
+
 .divider{
   height:0px;
   border-top:1px solid #ddd;
   margin-top:4px;
   margin-bottom:4px;
+}
+
+.tabTool{
+  text-align:right;
+  margin-bottom:8px;
+}
+
+
+dl.form_col{
+  display:flex;
+  flex-direction: column;
+  margin-bottom:8px;
+}
+
+dl.form_col dt{
+  margin:0px;
+  padding:0px;
+  flex:0 0 20px;
+}
+
+dl.form_col dd{
+  margin:0px;padding:0px;
+  flex:1 1 auto
+}
+
+
+dl.form_row{
+  display:flex;
+  flex-direction: row;
+}
+
+dl.form_row dt{
+  margin:0px;
+  padding:0px;
+  flex:0 0 150px
+}
+
+dl.form_row dd{
+  margin:0px;padding:0px;
+  flex:1 1 auto
 }

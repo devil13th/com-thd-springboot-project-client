@@ -21,6 +21,7 @@ import {
   Row,
   Col,
   Popover,
+  Spin,
   Empty,
   Card,
   DatePicker,
@@ -496,6 +497,7 @@ class CgTestList extends React.Component {
 
     const listView = (
       <div>
+        <Spin tip="Loading..." spinning={this.state.tabLoading}>
         <div
           style={{
             display: "flex",
@@ -567,6 +569,7 @@ class CgTestList extends React.Component {
             onChange={this.tabPaginationChange}
           />
         </div>
+        </Spin>
       </div>
     );
 
