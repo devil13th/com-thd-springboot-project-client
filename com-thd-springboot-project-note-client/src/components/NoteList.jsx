@@ -11,6 +11,7 @@ import {
   Alert,
   InputNumber,
   Dropdown,
+  
   Space,
   Checkbox,
   Tooltip,
@@ -35,6 +36,7 @@ import {
   UpOutlined,
   EyeOutlined,
   CloseCircleFilled,
+  UserOutlined,
   TableOutlined,
   CloseOutlined,
   UnorderedListOutlined,
@@ -417,6 +419,35 @@ class NoteList extends React.Component {
     });
   };
 
+
+  search = () => {
+    NoteApi.search(this.state.queryCondition.keyWords,null).then(r => {
+      this.setState({
+        tabData:r.result
+      })
+    })
+  }
+
+  deleteIndex = () => {
+    NoteApi.deleteNodeIndex().then(r => {
+      if(r.result){
+        message.success("success! ");
+      }else{
+        message.error(r.msg);
+      }
+    })
+  }
+
+  createIndex = () => {
+    NoteApi.createNoteIndex().then(r => {
+      if(r.result){
+        message.success("success! ");
+      }else{
+        message.error(r.msg);
+      }
+    })
+  }
+
   // =============================== render  =============================== //
   render() {
     // 表格字段
@@ -429,16 +460,17 @@ class NoteList extends React.Component {
       },
       {
         title: "title",
+        width:500,
         dataIndex: "title",
         key: "title",
         sorter: true,
       },
-      {
-        title: "content",
-        dataIndex: "content",
-        key: "content",
-        sorter: true,
-      },
+      // {
+      //   title: "content",
+      //   dataIndex: "content",
+      //   key: "content",
+      //   sorter: true,
+      // },
       {
         title: "expireDate",
         dataIndex: "expireDate",
@@ -536,10 +568,10 @@ class NoteList extends React.Component {
                       <dd>{item.title}</dd>
                     </dl>
 
-                    <dl className="profile">
+                    {/* <dl className="profile">
                       <dt>content</dt>
                       <dd>{item.content}</dd>
-                    </dl>
+                    </dl> */}
 
                     <dl className="profile">
                       <dt>expireDate</dt>
@@ -757,6 +789,26 @@ class NoteList extends React.Component {
                 enterButton
               />
 
+              
+              <Dropdown.Button onClick={this.search} overlay={
+                <Menu >
+                  <Menu.Item key="1" onClick={this.createIndex} icon={<UserOutlined />}>
+                    Create Note Index
+                  </Menu.Item>
+                  <Menu.Item key="2" onClick={this.deleteIndex} icon={<UserOutlined />}>
+                    Delete Note Index
+                  </Menu.Item>
+                  <Menu.Item key="3" icon={<UserOutlined />}>
+                    Reindex Note
+                  </Menu.Item>
+                </Menu>
+              }>
+                Full Search
+              </Dropdown.Button>
+              
+              
+
+
               <Popover
                 content={advanceSearch}
                 trigger="click"
@@ -839,7 +891,7 @@ class NoteList extends React.Component {
           title="Note Information"
           visible={this.state.formModalVisible}
           footer={null}
-          width={"100%"}
+          width={"80%"}
           destroyOnClose={true}
           onCancel={this.closeNoteFormModal}
           maskClosable={false}
@@ -855,7 +907,7 @@ class NoteList extends React.Component {
         <Modal
           title="Edit Note"
           visible={this.state.viewModalVisible}
-          width={"100%"}
+          width={"80%"}
           destroyOnClose={true}
           onCancel={this.closeNoteViewModal}
           maskClosable={false}

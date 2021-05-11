@@ -41,7 +41,30 @@ export default {
       url: `${context}/note/deleteLogicByNoteIds`,
       data:idList
     });
+  },
+  search:function(keyWords,classify){
+    return axios({
+      method: 'get',
+      url: `${context}/note/search?keyWords=${keyWords}`
+    });
+  },
+  deleteNodeIndex:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/note/deleteNodeIndex`
+    });
+  },
+  createNoteIndex:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/note/createNoteIndex`
+    });
   }
+  
+
+
+
+  
 
 
 

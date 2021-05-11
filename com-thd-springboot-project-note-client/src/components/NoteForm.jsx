@@ -1,6 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoteApi from "@/api/NoteApi";
+import MdEditor from "./MdEditor";
+import Mde from "./Mde";
 import {
   message,
   Input,
@@ -9,15 +12,20 @@ import {
   DatePicker,
   Space,
   Button,
+  Radio,
+  InputNumber,
   Tag,
   Divider,
 } from "antd";
 import { SaveOutlined, RollbackOutlined } from "@ant-design/icons";
 import DateUtils from "@/tools/DateUtils";
 import moment from "moment";
+
+const { CheckableTag } = Tag;
+
 class NoteForm extends React.Component {
   state = {
-    formData: {},
+    formData: { content: "" },
     inputSize: "normal",
     formStatus: "CREATE",
     // colSpan: {
@@ -69,11 +77,11 @@ class NoteForm extends React.Component {
     }
   }
 
-  createInputMode = (e, propName) => {
+  createInputMode = (v, propName) => {
     this.setState({
       formData: {
         ...this.state.formData,
-        [propName]: e.target.value,
+        [propName]: v,
       },
     });
   };
@@ -93,12 +101,18 @@ class NoteForm extends React.Component {
         size={this.state.inputSize}
         value={this.state.formData[propName]}
         onChange={(e) => {
-          this.createInputMode(e, propName);
+          this.createInputMode(e.target.value, propName);
         }}
       />
     );
   };
-
+  selectTag = (classify) => {
+    return () => {
+      this.setState({
+        formData: { ...this.state.formData, classify },
+      });
+    };
+  };
   saveNote = () => {
     if (this.state.formStatus === "CREATE") {
       NoteApi.addNote(this.state.formData)
@@ -124,13 +138,128 @@ class NoteForm extends React.Component {
         .catch((r) => {});
     }
   };
+
+  mdChange = (content) => {
+    this.setState({
+      formData: { ...this.state.formData, content },
+    });
+  };
+
+  setClassify = (e) => {
+    this.setState({
+      formData: { ...this.state.formData, classify: e.target.value },
+    });
+  };
+
   render() {
     return (
       <div>
         {/* {JSON.stringify(this.state.formData)} */}
+        {/* <Editor></Editor> */}
 
         <Row gutter={24}>
-          <Col {...this.state.colSpan} style={{display:'none'}}>
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dd>
+                <div
+                  style={{ background: "#fffbe6", borderRadius: 5, padding: 8 }}
+                >
+                  {/* <Radio.Group
+                      value={this.state.formData.classify}
+                      buttonStyle="solid"
+                      onChange={this.setClassify}
+                    >
+                      <Radio.Button value="Todo">Todo</Radio.Button>
+                      <Radio.Button value="Note">Note</Radio.Button>
+                      <Radio.Button value="Knowledge">Knowledge</Radio.Button>
+                    </Radio.Group> */}
+
+                  <CheckableTag
+                    key="Todo"
+                    onChange={this.selectTag("Todo")}
+                    checked={this.state.formData.classify === "Todo"}
+                    icon={
+                      <FontAwesomeIcon
+                        icon="th-list"
+                        style={{
+                          fontSize: 14,
+                          paddingTop: 2,
+                          marginRight: 8,
+                          color: "#ffffff",
+                        }}
+                      />
+                    }
+                  >
+                    Todo
+                  </CheckableTag>
+
+                  <CheckableTag
+                    key="Note"
+                    onChange={this.selectTag("Note")}
+                    checked={this.state.formData.classify === "Note"}
+                    icon={
+                      <FontAwesomeIcon
+                        icon="clipboard-list"
+                        style={{
+                          fontSize: 14,
+                          paddingTop: 2,
+                          marginRight: 8,
+                          color: "#ffffff",
+                        }}
+                      />
+                    }
+                  >
+                    Note
+                  </CheckableTag>
+
+                  <CheckableTag
+                    key="Knowledge"
+                    onChange={this.selectTag("Knowledge")}
+                    checked={this.state.formData.classify === "Knowledge"}
+                    icon={
+                      <FontAwesomeIcon
+                        icon="book"
+                        style={{
+                          fontSize: 14,
+                          paddingTop: 2,
+                          marginRight: 8,
+                          color: "#ffffff",
+                        }}
+                      />
+                    }
+                  >
+                    Knowledge
+                  </CheckableTag>
+                </div>
+              </dd>
+            </dl>
+          </Col>
+
+          <Col {...this.state.colSpan}>
+            <dl className="form_col">
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.formData.title}
+                  placeholder="Title ..."
+                  onChange={(e) => {
+                    this.createInputMode(e.target.value, "title");
+                  }}
+                />
+              </dd>
+            </dl>
+          </Col>
+          <Col {...this.state.colSpan}>
+            {/* <Mde
+              change={this.mdChange}
+              content={this.state.formData.content}
+            ></Mde> */}
+            <MdEditor
+              change={this.mdChange}
+              content={this.state.formData.content}
+            ></MdEditor>
+          </Col>
+          <Col {...this.state.colSpan} style={{ display: "none" }}>
             <dl className="form_col">
               <dt>PK</dt>
               <dd>
@@ -138,94 +267,67 @@ class NoteForm extends React.Component {
                   size={this.state.inputSize}
                   value={this.state.formData.noteId}
                   onChange={(e) => {
-                    this.createInputMode(e, "noteId");
+                    this.createInputMode(e.target.value, "noteId");
                   }}
                 />
               </dd>
             </dl>
           </Col>
 
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>classify</dt>
-              <dd>
-                <Tag color="#55acee">
-                  Todo
-                </Tag>
-                <Tag color="#cd201f">
-                  Note
-                </Tag>
-                <Tag color="#3b5999">
-                  Knowledge
-                </Tag>
-              </dd>
-            </dl>
-          </Col>
-
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>title</dt>
-              <dd>
-                <Input
-                  size={this.state.inputSize}
-                  value={this.state.formData.title}
-                  onChange={(e) => {
-                    this.createInputMode(e, "title");
-                  }}
-                />
-              </dd>
-            </dl>
-          </Col>
-
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>content</dt>
-              <dd>
-                <Input
+          {/* <Col {...this.state.colSpan}>
+                <dl className="form_col">
+                  <dt>content</dt>
+                  <dd>
+                    <Input
                   size={this.state.inputSize}
                   value={this.state.formData.content}
                   onChange={(e) => {
-                    this.createInputMode(e, "content");
+                    this.createInputMode(e.target.value, "content");
                   }}
                 />
-              </dd>
-            </dl>
-          </Col>
+                  </dd>
+                </dl>
+              </Col> */}
 
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>expireDate</dt>
-              <dd>
-                <DatePicker
-                  size={this.state.inputSize}
-                  onChange={(moment, dataStr) => {
-                    this.createDateMode(dataStr, "expireDate");
-                  }}
-                  value={
-                    this.state.formData.expireDate
-                      ? moment(this.state.formData.expireDate, "YYYY-MM-DD")
-                      : null
-                  }
-                />
-              </dd>
-            </dl>
-          </Col>
+          {this.state.formData.classify === "Todo" ? (
+            <Col {...this.state.colSpan}>
+              <dl className="form_col">
+                <dt>Expire Date</dt>
+                <dd>
+                  <DatePicker
+                    size={this.state.inputSize}
+                    onChange={(moment, dataStr) => {
+                      this.createDateMode(dataStr, "expireDate");
+                    }}
+                    value={
+                      this.state.formData.expireDate
+                        ? moment(this.state.formData.expireDate, "YYYY-MM-DD")
+                        : null
+                    }
+                  />
+                </dd>
+              </dl>
+            </Col>
+          ) : null}
 
-          <Col {...this.state.colSpan}>
-            <dl className="form_col">
-              <dt>alarmDays</dt>
-              <dd>
-                <Input
-                  size={this.state.inputSize}
-                  value={this.state.formData.alarmDays}
-                  onChange={(e) => {
-                    this.createInputMode(e, "alarmDays");
-                  }}
-                />
-              </dd>
-            </dl>
-          </Col>
+          {this.state.formData.classify === "Todo" ? (
+            <Col {...this.state.colSpan}>
+              <dl className="form_col">
+                <dt>Alarm Days</dt>
+                <dd>
+                  <InputNumber
+                    size={this.state.inputSize}
+                    value={this.state.formData.alarmDays}
+                    onChange={(v) => {
+                      this.createInputMode(v, "alarmDays");
+                    }}
+                  />
+                </dd>
+              </dl>
+            </Col>
+          ) : null}
         </Row>
+
         <Divider></Divider>
         <div style={{ textAlign: "right" }}>
           <Space>
