@@ -5,18 +5,17 @@ axios.interceptors.response.use(function (response) {
 
     // console.log('--res success--',response)
     // 对响应数据做点什么
-
     if(response.data.code === '-1'){
       message.error(response.data.msg)
       throw new Error(response.data.msg)
+    }else{
+      return response.data;
     }
-    return response.data;
-   
     
   }, function (error) {
     // console.log('--req error--',error)
 
-    message.error('Error:'+ error);
+    message.error( error);
     // 对响应错误做点什么
     return Promise.reject(error);
   });

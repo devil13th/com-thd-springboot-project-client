@@ -1,16 +1,18 @@
 import React from "react";
-import { Input, Menu, Row, Col,Modal } from "antd";
+import { Input, Menu, Row, Col, Modal, Empty, message } from "antd";
 import {
   PlusOutlined,
   UploadOutlined,
   EditOutlined,
   HddOutlined,
   UndoOutlined,
+  DeploymentUnitOutlined,
   AppstoreOutlined,
   TagOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import Doc from './Doc.jsx'
+import Doc from "./Doc.jsx";
+import API from "@/api/KnowledgeApi";
 const { Search } = Input;
 const { SubMenu } = Menu;
 var imgUrl = require("@/assets/images/thdicon.png");
@@ -20,11 +22,17 @@ class Knowledge extends React.Component {
     keyWord: "",
     dataList: [],
     current: "",
-    docVisible:false,
+    docVisible: false,
   };
   onSearch = (keyWord) => {
     this.setState({ keyWord });
-    alert(keyWord);
+    const searchVO = { keyWords: keyWord };
+    API.search(searchVO).then((r) => {
+      console.log(r);
+      this.setState({
+        dataList: r.result,
+      });
+    });
   };
 
   handleClick = (e) => {
@@ -34,104 +42,163 @@ class Knowledge extends React.Component {
 
   closeDocVisible = () => {
     this.setState({
-      docVisible:false
-    })
-  }
+      docVisible: false,
+    });
+  };
   openDocVisible = () => {
     this.setState({
-      docVisible:true
-    })
-  }
+      docVisible: true,
+    });
+  };
+  createDocIndex = () => {
+    API.createDocIndex().then(
+      (r) => {
+        console.log(r);
+      },
+      (err) => {
+        debugger;
+        message.error(err.message);
+      }
+    );
+  };
+  indexThdTecFile = () => {
+    API.indexThdTecFile().then((r) => {
+      message.success("SUCCESS");
+    });
+  };
   render() {
     console.log("================", imgUrl);
+
+    const hasResult = this.state.dataList.length > 0;
+
+    const search = (
+      <Search
+        prefix={
+          <img src={imgUrl.default} style={{ marginRight: 8 }} height="22" />
+        }
+        value={this.state.keyWord}
+        placeholder="input search text"
+        onSearch={this.onSearch}
+        onChange={(e) => {
+          this.setState({ keyWord: e.target.value });
+        }}
+        enterButton
+        placeholder="input search text"
+      />
+    );
+
+    const result = this.state.dataList.map((item, index) => {
+      return (
+        <dl key={index}>
+          <dt style={{fontSize:18}}>{item.title}</dt>
+          <dd>
+            <div> {item.desc}</div>
+            {item.highLight ? (
+              <ul>
+                {item.highLight.map((hl, idx) => {
+                  return (
+                    <li key={idx} dangerouslySetInnerHTML={{ __html: hl }}></li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </dd>
+        </dl>
+      );
+    });
+
+    const emptyData = <Empty style={{marginTop:32}}/>;
     return (
       <div
         style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
       >
-        <div
-          style={{
-            flex: "0 0 40%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ flex: "0 0 50px" }}>
-            <Row gutter={24}>
-              <Col span={4}>
-                <div style={{ padding: 2 }}>
-                  <img src={imgUrl.default} />
-                </div>
-              </Col>
-              <Col span={20}>
-                <Menu
-                  onClick={this.handleClick}
-                  selectedKeys={[this.state.current]}
-                  mode="horizontal"
-                  style={{ textAlign: "right", borderBottom: "0px" }}
+        <div style={{ overflow: "auto", flex: "1 1 auto", color: "#8f8f8f" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <div style={{ flex: "0 0 300px", paddingTop: 4 }}>
+              {hasResult ? <div>{search}</div> : null}
+            </div>
+            <div style={{ flex: "1 1 auto" }}>
+              <Menu
+                onClick={this.handleClick}
+                selectedKeys={[this.state.current]}
+                mode="horizontal"
+                style={{ textAlign: "right", borderBottom: "0px" }}
+              >
+                <Menu.Item key="mail" icon={<UploadOutlined />}>
+                  Upload Doc
+                </Menu.Item>
+                <Menu.Item
+                  key="app"
+                  icon={<EditOutlined />}
+                  onClick={this.openDocVisible}
                 >
-                  <Menu.Item key="mail" icon={<UploadOutlined />}>
-                    Upload Doc
-                  </Menu.Item>
-                  <Menu.Item key="app" icon={<EditOutlined />} onClick={this.openDocVisible}>
+                  Create New Doc
+                </Menu.Item>
+                <SubMenu
+                  key="SubMenu"
+                  icon={<SettingOutlined />}
+                  title="Setting"
+                >
+                  <Menu.Item key="setting:5" icon={<PlusOutlined />}>
                     Create New Doc
                   </Menu.Item>
-                  <SubMenu
-                    key="SubMenu"
-                    icon={<SettingOutlined />}
-                    title="Setting"
-                  >
-                    <Menu.Item key="setting:5" icon={<PlusOutlined />}>
-                      Create New Doc
+                  <Menu.ItemGroup title="Index">
+                    <Menu.Item key="setting:1">Index Tec</Menu.Item>
+                    <Menu.Item key="setting:2" icon={<UndoOutlined />}>
+                      Reindex
                     </Menu.Item>
-                    <Menu.ItemGroup title="Index">
-                      <Menu.Item key="setting:1">Index Tec</Menu.Item>
-                      <Menu.Item key="setting:2" icon={<UndoOutlined />}>
-                        Reindex
-                      </Menu.Item>
-                    </Menu.ItemGroup>
-                    <Menu.ItemGroup title="Management">
-                      <Menu.Item key="setting:3" icon={<TagOutlined />}>
-                        Classify
-                      </Menu.Item>
-                      <Menu.Item key="setting:4" icon={<HddOutlined />}>
-                        Document
-                      </Menu.Item>
-                    </Menu.ItemGroup>
-                  </SubMenu>
-                </Menu>
-              </Col>
-            </Row>
+                  </Menu.ItemGroup>
+                  <Menu.ItemGroup title="Management">
+                    <Menu.Item key="setting:3" icon={<TagOutlined />}>
+                      Classify
+                    </Menu.Item>
+                    <Menu.Item key="setting:4" icon={<HddOutlined />}>
+                      Document
+                    </Menu.Item>
+                    <Menu.Item
+                      key="setting:createDocIndex"
+                      icon={<DeploymentUnitOutlined />}
+                      onClick={this.createDocIndex}
+                    >
+                      Create Index
+                    </Menu.Item>
+                    <Menu.Item
+                      key="setting:indexThdTecFile"
+                      icon={<DeploymentUnitOutlined />}
+                      onClick={this.indexThdTecFile}
+                    >
+                      Index Thd Tec Folder
+                    </Menu.Item>
+                  </Menu.ItemGroup>
+                </SubMenu>
+              </Menu>
+            </div>
           </div>
-          <div style={{ flex: "5 1 100px" }}></div>
-          <div style={{ flex: "0 0 70px" }}>
-            <Row gutter={24}>
-              <Col xs={1} sm={1} sm={1} md={4} lg={6} xl={8} xxl={8}></Col>
-              <Col xs={22} sm={22} sm={22} md={16} lg={12} xl={8} xxl={8} >
-                <img src={logoUrl.default}  height="30"/>
-                <Search
-                  placeholder="input search text"
-                  onSearch={this.onSearch}
-                  enterButton
-                  placeholder="input search text"
-                  size="large"
-                />
-              </Col>
-              <Col  xs={1} sm={1} sm={1} md={4} lg={6} xl={8} xxl={10}></Col>
-            </Row>
+
+          
+            {/* 首页搜索 */}
+            {!hasResult ? (
+              <div style={{ marginTop: 100, width: 500, margin: "0px auto" }}>
+                <img src={logoUrl.default} height="30" />
+                {search}
+              </div>
+            ) : null}
+          <div style={{ marginTop: 100,  margin: "0px 100px" }}>
+            {hasResult ? result : emptyData}
           </div>
         </div>
-        <div style={{ flex: "1 1 auto" }}></div>
+
+        {/* footer */}
         <div style={{ flex: "0 0 40", textAlign: "center", color: "#8f8f8f" }}>
           {" "}
           Thd ElasticSearch{" "}
         </div>
 
-
         <Modal
           title="Create Document"
           visible={this.state.docVisible}
           width={"80%"}
-          style={{top:24}}
+          style={{ top: 24 }}
           destroyOnClose={true}
           onCancel={this.closeDocVisible}
           maskClosable={false}
@@ -139,8 +206,6 @@ class Knowledge extends React.Component {
         >
           <Doc></Doc>
         </Modal>
-
-
       </div>
     );
   }
