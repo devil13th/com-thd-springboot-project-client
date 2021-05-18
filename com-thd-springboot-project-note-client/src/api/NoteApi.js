@@ -59,6 +59,13 @@ export default {
       method: 'get',
       url: `${context}/note/createNoteIndex`
     });
+  },
+  toggleNoteState:function(id){
+    return axios({
+      method: 'get',
+      url: `${context}/note/toggleNoteState/${id}`
+    });
+    
   }
   
 

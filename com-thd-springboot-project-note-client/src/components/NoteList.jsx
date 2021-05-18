@@ -11,7 +11,8 @@ import {
   Alert,
   InputNumber,
   Dropdown,
-  
+  Tag,
+  Select,
   Space,
   Checkbox,
   Tooltip,
@@ -23,6 +24,7 @@ import {
   Col,
   Popover,
   Empty,
+  Rate,
   Card,
   DatePicker,
 } from "antd";
@@ -34,11 +36,15 @@ import moment from "moment";
 import {
   SearchOutlined,
   UpOutlined,
+  ExclamationOutlined,
   EyeOutlined,
   CloseCircleFilled,
   UserOutlined,
   TableOutlined,
+  InfoOutlined,
+  WarningOutlined,
   CloseOutlined,
+  CheckOutlined,
   UnorderedListOutlined,
   DeleteOutlined,
   DownOutlined,
@@ -47,11 +53,20 @@ import {
 } from "@ant-design/icons";
 
 const { Search } = Input;
+const { Option } = Select;
+const levelTags = [
+  { key: 5, value: "紧急", color: "#f50" },
+  { key: 4, value: "重要", color: "#108ee9" },
+  { key: 3, value: "正常", color: "#87d068" },
+  { key: 2, value: "不紧急", color: "#2db7f5" },
+  { key: 1, value: "不重要", color: "#2db7f5" },
+];
+
 class NoteList extends React.Component {
   state = {
     advanceSearchVisible: false,
     colSpan: 24,
-    viewType: "LIST",
+    viewType: "DETAIL",
     // 查询条件
     queryCondition: {
       noteId: "",
@@ -202,8 +217,8 @@ class NoteList extends React.Component {
     let queryCondition = this.state.queryCondition;
     queryCondition.pageNum = currentPage;
     queryCondition.pageSize = this.state.tabPagination.pageSize;
-    queryCondition.sortField = this.state.tabSort.field;
-    queryCondition.sortOrder = this.state.tabSort.order;
+    //queryCondition.sortField = this.state.tabSort.field;
+    //queryCondition.sortOrder = this.state.tabSort.order;
     NoteApi.queryNoteLikeByPage(queryCondition)
       .then((r) => {
         this.setState({
@@ -246,10 +261,36 @@ class NoteList extends React.Component {
             // message.info(JSON.stringify(record));
             this.openNoteViewModal(record.noteId);
           }}
-          icon={<EyeOutlined />}
+          icon={<InfoOutlined />}
         >
           Data View
         </Menu.Item>
+
+        {record.classify === "Todo" ? (
+          record.todoStatus === 0 ? (
+            <Menu.Item
+              key="3"
+              onClick={() => {
+                // message.info(JSON.stringify(record));
+                this.toggleNoteState(record.noteId);
+              }}
+              icon={<CheckOutlined />}
+            >
+              Finish
+            </Menu.Item>
+          ) : (
+            <Menu.Item
+              key="4"
+              onClick={() => {
+                // message.info(JSON.stringify(record));
+                this.toggleNoteState(record.noteId);
+              }}
+              icon={<CloseOutlined />}
+            >
+              Unfinish
+            </Menu.Item>
+          )
+        ) : null}
       </Menu>
     );
     return (
@@ -419,37 +460,75 @@ class NoteList extends React.Component {
     });
   };
 
-
   search = () => {
-    NoteApi.search(this.state.queryCondition.keyWords,null).then(r => {
+    NoteApi.search(this.state.queryCondition.keyWords, null).then((r) => {
       this.setState({
-        tabData:r.result
-      })
-    })
-  }
+        tabData: r.result,
+      });
+    });
+  };
 
   deleteIndex = () => {
-    NoteApi.deleteNodeIndex().then(r => {
-      if(r.result){
+    NoteApi.deleteNodeIndex().then((r) => {
+      if (r.result) {
         message.success("success! ");
-      }else{
+      } else {
         message.error(r.msg);
       }
-    })
-  }
+    });
+  };
 
   createIndex = () => {
-    NoteApi.createNoteIndex().then(r => {
-      if(r.result){
+    NoteApi.createNoteIndex().then((r) => {
+      if (r.result) {
         message.success("success! ");
-      }else{
+      } else {
         message.error(r.msg);
       }
-    })
-  }
+    });
+  };
+
+  computColor = (item) => {
+    if (item.classify === "Todo") {
+      if (item.todoStatus === 0) {
+        if (item.todoLevel === 5) {
+          return "block red_block";
+        } else if (item.todoLevel === 4) {
+          return "block yellow_block";
+        } else if (item.todoLevel === 3) {
+          return "block green_block";
+        }
+      } else {
+        return "block gray_block";
+      }
+    }
+    return "block";
+  };
+
+  toggleNoteState = (id) => {
+    NoteApi.toggleNoteState(id).then(
+      (r) => {
+        console.log(r);
+        if (r.code !== "-1") {
+          message.success("SUCCESS");
+          this.queryTabData();
+        } else {
+          message.error(r.msg);
+        }
+      },
+      (r) => {
+        message.error(r.msg);
+      }
+    );
+  };
 
   // =============================== render  =============================== //
   render() {
+    const levelTagsObj = {};
+    levelTags.forEach((item) => {
+      levelTagsObj[item.key] = item;
+    });
+
     // 表格字段
     const tabDataColumns = [
       {
@@ -460,7 +539,7 @@ class NoteList extends React.Component {
       },
       {
         title: "title",
-        width:500,
+        width: 500,
         dataIndex: "title",
         key: "title",
         sorter: true,
@@ -554,35 +633,62 @@ class NoteList extends React.Component {
           {this.state.tabData.length > 0 ? (
             this.state.tabData.map((item) => {
               return (
-                <div style={{ flex: "0 0 20%", padding: '0px 8px 8px 0px' }} key={item.noteId}>
-                  <div className="block">
-                    <div className="title">{item.noteId}</div>
+                <div
+                  style={{ flex: "0 0 20%", padding: "0px 8px 8px 0px" }}
+                  key={item.noteId}
+                >
+                  <div className={this.computColor(item)}>
+                    <div className="title">{item.title}</div>
 
-                    <dl className="profile">
-                      <dt>classify</dt>
-                      <dd>{item.classify}</dd>
-                    </dl>
+                    <div style={{ height: 126 }}>
+                      <dl className="profile">
+                        <dt>classify</dt>
+                        <dd>{item.classify}</dd>
+                      </dl>
 
-                    <dl className="profile">
-                      <dt>title</dt>
-                      <dd>{item.title}</dd>
-                    </dl>
-
-                    {/* <dl className="profile">
+                      {/* <dl className="profile">
                       <dt>content</dt>
                       <dd>{item.content}</dd>
                     </dl> */}
 
-                    <dl className="profile">
-                      <dt>expireDate</dt>
-                      <dd>{DateUtils.formatToDate(item.expireDate)}</dd>
-                    </dl>
+                      <dl className="profile">
+                        <dt>Level</dt>
+                        <dd>
+                          <Rate
+                            disabled
+                            defaultValue={item.todoLevel}
+                            style={{ fontSize: 14 }}
+                          />
+                        </dd>
+                      </dl>
 
-                    <dl className="profile">
-                      <dt>alarmDays</dt>
-                      <dd>{item.alarmDays}</dd>
-                    </dl>
+                      {item.classify === "Todo" ? (
+                        <div>
+                          <dl className="profile">
+                            <dt>Status</dt>
+                            <dd>
+                              {item.todoStatus === 1 ? (
+                                <CheckOutlined />
+                              ) : (
+                                <ExclamationOutlined
+                                  style={{ fontSize: 14, color: "red" }}
+                                />
+                              )}{" "}
+                            </dd>
+                          </dl>
 
+                          <dl className="profile">
+                            <dt>expireDate</dt>
+                            <dd>{DateUtils.formatToDate(item.expireDate)}</dd>
+                          </dl>
+
+                          <dl className="profile">
+                            <dt>alarmDays</dt>
+                            <dd>{item.alarmDays}</dd>
+                          </dl>
+                        </div>
+                      ) : null}
+                    </div>
                     <div className="divider"></div>
                     <div style={{ display: "flex" }}>
                       <div style={{ flex: "1 1 auto", paddingTop: 4 }}>
@@ -751,7 +857,7 @@ class NoteList extends React.Component {
         <Row gutter={24}>
           <Col span={12}>
             <div
-              style={{ paddingTop: 4, cursor: "pointer" }}
+              style={{ paddingTop: 4, width: 56, cursor: "pointer" }}
               onClick={this.toggleViewType}
             >
               {this.state.viewType === "ITEM" ? (
@@ -774,6 +880,18 @@ class NoteList extends React.Component {
           <Col span={12}>
             {/* ======================= 搜索 ======================= */}
             <div className="tabTool">
+              <Select
+                defaultValue={0}
+                style={{ marginRight: 8, width: 120, textAlign: "left" }}
+                onChange={(v) => {
+                  this.createMode(v, "todoStatus");
+                  this.queryTabData(true);
+                }}
+              >
+                <Option value={0}>Finish</Option>
+                <Option value={1}>UnFinish</Option>
+              </Select>
+
               <Search
                 placeholder="Key Word"
                 style={{ width: 200, marginRight: 8 }}
@@ -789,25 +907,32 @@ class NoteList extends React.Component {
                 enterButton
               />
 
-              
-              <Dropdown.Button onClick={this.search} overlay={
-                <Menu >
-                  <Menu.Item key="1" onClick={this.createIndex} icon={<UserOutlined />}>
-                    Create Note Index
-                  </Menu.Item>
-                  <Menu.Item key="2" onClick={this.deleteIndex} icon={<UserOutlined />}>
-                    Delete Note Index
-                  </Menu.Item>
-                  <Menu.Item key="3" icon={<UserOutlined />}>
-                    Reindex Note
-                  </Menu.Item>
-                </Menu>
-              }>
+              {/* <Dropdown.Button
+                onClick={this.search}
+                overlay={
+                  <Menu>
+                    <Menu.Item
+                      key="1"
+                      onClick={this.createIndex}
+                      icon={<UserOutlined />}
+                    >
+                      Create Note Index
+                    </Menu.Item>
+                    <Menu.Item
+                      key="2"
+                      onClick={this.deleteIndex}
+                      icon={<UserOutlined />}
+                    >
+                      Delete Note Index
+                    </Menu.Item>
+                    <Menu.Item key="3" icon={<UserOutlined />}>
+                      Reindex Note
+                    </Menu.Item>
+                  </Menu>
+                }
+              >
                 Full Search
-              </Dropdown.Button>
-              
-              
-
+              </Dropdown.Button> */}
 
               <Popover
                 content={advanceSearch}
@@ -892,6 +1017,7 @@ class NoteList extends React.Component {
           visible={this.state.formModalVisible}
           footer={null}
           width={"80%"}
+          style={{ top: 24 }}
           destroyOnClose={true}
           onCancel={this.closeNoteFormModal}
           maskClosable={false}

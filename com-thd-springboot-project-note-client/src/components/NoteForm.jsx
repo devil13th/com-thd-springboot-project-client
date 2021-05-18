@@ -10,22 +10,30 @@ import {
   Row,
   Col,
   DatePicker,
+  TimePicker,
   Space,
   Button,
   Radio,
-  InputNumber,
   Tag,
+  InputNumber,
   Divider,
+  Rate
 } from "antd";
 import { SaveOutlined, RollbackOutlined } from "@ant-design/icons";
 import DateUtils from "@/tools/DateUtils";
 import moment from "moment";
 
 const { CheckableTag } = Tag;
-
+const levelTags = [
+  { key: 5, value: "紧急", color: "#cf1322" },
+  { key: 4, value: "重要", color: "#d48806" },
+  { key: 3, value: "正常", color: "#87d068" },
+  { key: 2, value: "不紧急", color: "#2db7f5" },
+  { key: 1, value: "不重要", color: "#2db7f5" },
+];
 class NoteForm extends React.Component {
   state = {
-    formData: { content: "" },
+    formData: { classify: "Todo", content: "", todoLevel: 3, todoStatus: 0 },
     inputSize: "normal",
     formStatus: "CREATE",
     // colSpan: {
@@ -67,11 +75,16 @@ class NoteForm extends React.Component {
 
       NoteApi.queryNoteById(this.props.noteId).then((r) => {
         const rst = r.result;
-        if (rst.userBirthday) {
-          rst.userBirthday = DateUtils.formatToDate(rst.userBirthday);
+        if (rst.startTime) {
+          rst.startDateTemp = rst.startTime.split(" ")[0];
+          rst.startTimeTemp = rst.startTime.split(" ")[1];
+        }
+        if (rst.finishTime) {
+          rst.finishDateTemp = rst.finishTime.split(" ")[0];
+          rst.finishTimeTemp = rst.finishTime.split(" ")[1];
         }
         this.setState({
-          formData: r.result,
+          formData: rst,
         });
       });
     }
@@ -114,8 +127,16 @@ class NoteForm extends React.Component {
     };
   };
   saveNote = () => {
+    const data = this.state.formData;
+    if (data.startTimeTemp) {
+      data.startTime = data.startDateTemp + " " + data.startTimeTemp;
+    }
+    if (data.finishTimeTemp) {
+      data.finishTime = data.finishDateTemp + " " + data.finishTimeTemp;
+    }
+
     if (this.state.formStatus === "CREATE") {
-      NoteApi.addNote(this.state.formData)
+      NoteApi.addNote(data)
         .then((r) => {
           // console.log(r);
           this.props.closeFn();
@@ -126,7 +147,7 @@ class NoteForm extends React.Component {
         })
         .catch((r) => {});
     } else {
-      NoteApi.updateNote(this.state.formData)
+      NoteApi.updateNote(data)
         .then((r) => {
           // console.log(r);
           this.props.closeFn();
@@ -151,14 +172,19 @@ class NoteForm extends React.Component {
     });
   };
 
+  todoLevelChange = (tag, checked) => {
+    this.setState({ formData: { ...this.state.formData, todoLevel: tag.key } });
+  };
+
   render() {
+    const todoLevel = [this.state.formData.todoLevel];
     return (
       <div>
         {/* {JSON.stringify(this.state.formData)} */}
         {/* <Editor></Editor> */}
 
         <Row gutter={24}>
-          <Col {...this.state.colSpan}>
+          <Col span={12}>
             <dl className="form_col">
               <dd>
                 <div
@@ -234,7 +260,15 @@ class NoteForm extends React.Component {
               </dd>
             </dl>
           </Col>
-
+          <Col span={12}>
+          <Rate 
+            count={5} 
+            value={this.state.formData.todoLevel} tooltips={['不重要','不紧急','正常','重要','紧急']}
+            onChange={(ct) => {
+              this.createInputMode(ct, "todoLevel");
+            }}
+            />
+            </Col>
           <Col {...this.state.colSpan}>
             <dl className="form_col">
               <dd>
@@ -249,6 +283,29 @@ class NoteForm extends React.Component {
               </dd>
             </dl>
           </Col>
+
+          {this.state.formData.classify === "Todo" ? (
+            <Col {...this.state.colSpan}>
+              <dl class="form_row">
+                
+              <dd>
+                
+               
+
+                {/* {levelTags.map((tag) => (
+                  <CheckableTag
+                    key={tag.key}
+                    checked={todoLevel.indexOf(tag.key) > -1}
+                    onChange={(checked) => this.todoLevelChange(tag, checked)}
+                  >
+                    {tag.value}
+                  </CheckableTag>
+                ))} */}
+                </dd>
+              </dl>
+            </Col>
+          ) : null}
+
           <Col {...this.state.colSpan}>
             {/* <Mde
               change={this.mdChange}
@@ -291,39 +348,136 @@ class NoteForm extends React.Component {
 
           {this.state.formData.classify === "Todo" ? (
             <Col {...this.state.colSpan}>
-              <dl className="form_col">
-                <dt>Expire Date</dt>
-                <dd>
-                  <DatePicker
-                    size={this.state.inputSize}
-                    onChange={(moment, dataStr) => {
-                      this.createDateMode(dataStr, "expireDate");
-                    }}
-                    value={
-                      this.state.formData.expireDate
-                        ? moment(this.state.formData.expireDate, "YYYY-MM-DD")
-                        : null
-                    }
-                  />
-                </dd>
-              </dl>
-            </Col>
-          ) : null}
-
-          {this.state.formData.classify === "Todo" ? (
-            <Col {...this.state.colSpan}>
-              <dl className="form_col">
-                <dt>Alarm Days</dt>
-                <dd>
-                  <InputNumber
-                    size={this.state.inputSize}
-                    value={this.state.formData.alarmDays}
-                    onChange={(v) => {
-                      this.createInputMode(v, "alarmDays");
-                    }}
-                  />
-                </dd>
-              </dl>
+              <Row gutter={24}>
+                <Col span="6">
+                  <dl className="form_col">
+                    <dt>Expire Date</dt>
+                    <dd>
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        size={this.state.inputSize}
+                        onChange={(moment, dataStr) => {
+                          this.createDateMode(dataStr, "expireDate");
+                        }}
+                        value={
+                          this.state.formData.expireDate
+                            ? moment(
+                                this.state.formData.expireDate,
+                                "YYYY-MM-DD"
+                              )
+                            : null
+                        }
+                      />
+                    </dd>
+                  </dl>
+                </Col>
+                <Col span="6">
+                  <dl className="form_col">
+                    <dt>Alarm Days</dt>
+                    <dd>
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        size={this.state.inputSize}
+                        value={this.state.formData.alarmDays}
+                        onChange={(v) => {
+                          this.createInputMode(v, "alarmDays");
+                        }}
+                      />
+                    </dd>
+                  </dl>
+                </Col>
+                <Col span="6">
+                  <dl className="form_col">
+                    <dt>Start Time</dt>
+                    <dd>
+                      <DatePicker
+                        style={{ width: "50%" }}
+                        size={this.state.inputSize}
+                        onChange={(moment, dataStr) => {
+                          this.createDateMode(dataStr, "startDateTemp");
+                        }}
+                        value={
+                          this.state.formData.startDateTemp
+                            ? moment(
+                                this.state.formData.startDateTemp,
+                                "YYYY-MM-DD"
+                              )
+                            : null
+                        }
+                      />
+                      <TimePicker
+                        style={{ width: "50%" }}
+                        size={this.state.inputSize}
+                        format={"HH:mm"}
+                        onChange={(moment, dataStr) => {
+                          this.createDateMode(dataStr, "startTimeTemp");
+                        }}
+                        value={
+                          this.state.formData.startTimeTemp
+                            ? moment(this.state.formData.startTimeTemp, "HH:mm")
+                            : null
+                        }
+                      />
+                    </dd>
+                  </dl>
+                </Col>
+                <Col span="6">
+                  <dl className="form_col">
+                    <dt>Finish Time</dt>
+                    <dd>
+                      <DatePicker
+                        style={{ width: "50%" }}
+                        size={this.state.inputSize}
+                        onChange={(moment, dataStr) => {
+                          this.createDateMode(dataStr, "finishDateTemp");
+                        }}
+                        value={
+                          this.state.formData.finishDateTemp
+                            ? moment(
+                                this.state.formData.finishDateTemp,
+                                "YYYY-MM-DD"
+                              )
+                            : null
+                        }
+                      />
+                      <TimePicker
+                        style={{ width: "50%" }}
+                        format={"HH:mm"}
+                        size={this.state.inputSize}
+                        onChange={(moment, dataStr) => {
+                          this.createDateMode(dataStr, "finishTimeTemp");
+                        }}
+                        value={
+                          this.state.formData.finishTimeTemp
+                            ? moment(
+                                this.state.formData.finishTimeTemp,
+                                "HH:mm"
+                              )
+                            : null
+                        }
+                      />
+                    </dd>
+                  </dl>
+                </Col>
+              </Row>
+              <Row gutter={24}>
+                <Col span="12">
+                  <dl className="form_col">
+                    <dt>Status</dt>
+                    <dd>
+                      <Radio.Group
+                        value={this.state.formData.todoStatus}
+                        onChange={(e) => {
+                          this.createDateMode(e.target.value, "todoStatus");
+                        }}
+                      >
+                        <Radio.Button value={0}>Unfinish</Radio.Button>
+                        <Radio.Button value={1}>Finish</Radio.Button>
+                      </Radio.Group>
+                    </dd>
+                  </dl>
+                </Col>
+              </Row>
             </Col>
           ) : null}
         </Row>

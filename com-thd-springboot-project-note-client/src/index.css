@@ -38,6 +38,26 @@ code {
 .search-bar{margin:8px 0px;}
 
 
+.red_block{
+  border-top:3px solid #cf1322 !important;
+}
+
+.yellow_block{
+  border-top:3px solid #d48806 !important;
+}
+
+.green_block{
+  border-top:3px solid #87d068 !important;
+}
+
+.gray_block{
+  border-top:3px solid gray !important;
+}
+
+
+
+
+
 .block{
   border-radius:3px;
   border-top:3px solid #3c8dbc;

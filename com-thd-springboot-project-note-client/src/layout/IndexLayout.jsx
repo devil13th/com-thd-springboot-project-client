@@ -33,9 +33,9 @@ class IndexLayout extends React.Component {
     const { collapsed } = this.state;
     return (
       <Layout style={{ minHeight: "100vh" }}>
-        <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
+        {/* <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
           <div className="logo">
-            {/* Note */}
+        
             ____
           </div>
           <Menu theme="dark" defaultSelectedKeys={["1"]} mode="inline">
@@ -46,15 +46,15 @@ class IndexLayout extends React.Component {
               <Link to="/Knowledge">Knowledge </Link>
             </Menu.Item>
           </Menu>
-        </Sider>
+        </Sider> */}
         <Layout className="site-layout">
           <Content style={{ margin: "8px 8px 0px" }}>
             <div
               className="site-layout-background"
               style={{ padding: "8px 8px", minHeight: 360, background: "#fff" }}
             >
-              <Route path="/noteList" exact component={NoteList}></Route>
-              <Route path="/Knowledge" exact component={Knowledge}></Route>
+              <Route path="/" exact component={NoteList}></Route>
+              {/* <Route path="/Knowledge" exact component={Knowledge}></Route> */}
             </div>
           </Content>
           <Footer style={{ textAlign: "center" }}>
