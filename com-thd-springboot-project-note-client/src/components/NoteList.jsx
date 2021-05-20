@@ -39,6 +39,7 @@ import {
   ExclamationOutlined,
   EyeOutlined,
   CloseCircleFilled,
+  CalendarOutlined,
   UserOutlined,
   TableOutlined,
   InfoOutlined,
@@ -51,6 +52,7 @@ import {
   PlusOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
+import NoteCalendar from './NoteCalendar'
 
 const { Search } = Input;
 const { Option } = Select;
@@ -66,7 +68,7 @@ class NoteList extends React.Component {
   state = {
     advanceSearchVisible: false,
     colSpan: 24,
-    viewType: "DETAIL",
+    viewType: "DETAIL", // LIST DETAIL CALENDAR
     // 查询条件
     queryCondition: {
       noteId: "",
@@ -431,16 +433,10 @@ class NoteList extends React.Component {
   };
 
   // 切换视图类型
-  toggleViewType = () => {
-    if (this.state.viewType === "LIST") {
-      this.setState({
-        viewType: "ITEM",
-      });
-    } else {
-      this.setState({
-        viewType: "LIST",
-      });
-    }
+  toggleViewType = (type) => {
+    this.setState({
+      viewType: type,
+    });
   };
 
   // 高级搜索显示/隐藏 回调
@@ -617,6 +613,8 @@ class NoteList extends React.Component {
       </div>
     );
 
+    const calendarView = <NoteCalendar></NoteCalendar>
+
     const listView = (
       <div>
         <div
@@ -730,7 +728,7 @@ class NoteList extends React.Component {
       </div>
     );
 
-    const dataView = this.state.viewType === "LIST" ? tableView : listView;
+
 
     // ============== 高级搜索面板 =============== //
     const advanceSearch = (
@@ -849,6 +847,13 @@ class NoteList extends React.Component {
       </div>
     );
 
+
+    const dataView = {
+      "LIST":listView,
+      "DETAIL":tableView,
+      "CALENDAR":calendarView
+    };
+    
     // ============== 组件返回内容 =============== //
     return (
       <div>
@@ -856,26 +861,28 @@ class NoteList extends React.Component {
 
         <Row gutter={24}>
           <Col span={12}>
-            <div
-              style={{ paddingTop: 4, width: 56, cursor: "pointer" }}
-              onClick={this.toggleViewType}
-            >
-              {this.state.viewType === "ITEM" ? (
-                <span>
-                  <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
-                  <Divider type="vertical" />
-                  <UnorderedListOutlined style={{ fontSize: 14 }} />
-                </span>
-              ) : (
-                <span>
-                  <TableOutlined style={{ fontSize: 14 }} />
-                  <Divider type="vertical" />
-                  <UnorderedListOutlined
-                    style={{ fontSize: 16, color: "#1890ff" }}
-                  />
-                </span>
-              )}
-            </div>
+          
+            
+            {this.state.viewType === 'LIST' ? 
+            <TableOutlined  style={{ fontSize: 16, color: "#1890ff" }} /> : 
+            <TableOutlined  style={{ fontSize: 14 ,cursor:"pointer"}} onClick={ () => {this.toggleViewType("LIST")}}/>
+            }
+            
+            <Divider type="vertical" />
+            {this.state.viewType === 'DETAIL' ? 
+            <UnorderedListOutlined  style={{ fontSize: 16, color: "#1890ff" }} /> : 
+            <UnorderedListOutlined  style={{ fontSize: 14 ,cursor:"pointer"}} onClick={ () => {this.toggleViewType("DETAIL")}}/>
+            }
+
+           
+            <Divider type="vertical" />
+            {this.state.viewType === 'CALENDAR' ? 
+            <CalendarOutlined  style={{ fontSize: 16, color: "#1890ff" }} /> : 
+            <CalendarOutlined  style={{ fontSize: 14 ,cursor:"pointer"}} onClick={ () => {this.toggleViewType("CALENDAR")}}/>
+            }
+            
+               
+              
           </Col>
           <Col span={12}>
             {/* ======================= 搜索 ======================= */}
@@ -1009,7 +1016,7 @@ class NoteList extends React.Component {
           ></Alert>
         ) : null}
 
-        {dataView}
+        {dataView[this.state.viewType]}
 
         {/* ======================= modal窗口 ======================= */}
         <Modal
