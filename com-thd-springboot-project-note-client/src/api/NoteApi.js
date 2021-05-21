@@ -66,6 +66,16 @@ export default {
       url: `${context}/note/toggleNoteState/${id}`
     });
     
+  },
+  finishTodo:function(id,finishTime){
+    return axios({
+      method: 'post',
+      url: `${context}/note/finishTodo`,
+      data:{
+        noteId:id,
+        finishTime
+      }
+    });
   }
   
 

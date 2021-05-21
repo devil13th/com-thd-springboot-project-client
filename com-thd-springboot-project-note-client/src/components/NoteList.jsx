@@ -13,9 +13,11 @@ import {
   Dropdown,
   Tag,
   Select,
+  Switch,
   Space,
   Checkbox,
   Tooltip,
+  TimePicker,
   message,
   Divider,
   Pagination,
@@ -33,8 +35,10 @@ import DateUtils from "@/tools/DateUtils";
 import NoteForm from "./NoteForm";
 import NoteView from "./NoteView";
 import moment from "moment";
+import _ from 'lodash'
 import {
   SearchOutlined,
+  ClockCircleOutlined,
   UpOutlined,
   ExclamationOutlined,
   EyeOutlined,
@@ -52,7 +56,7 @@ import {
   PlusOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import NoteCalendar from './NoteCalendar'
+import NoteCalendar from "./NoteCalendar";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -66,12 +70,17 @@ const levelTags = [
 
 class NoteList extends React.Component {
   state = {
+    noteId:'',
+    finishDateTemp: moment(),
+    finishTimeTemp: moment(),
+    finishTimeModalVisible: false,
     advanceSearchVisible: false,
     colSpan: 24,
     viewType: "DETAIL", // LIST DETAIL CALENDAR
     // 查询条件
     queryCondition: {
       noteId: "",
+      todoStatus:false,
     },
     // loading状态
     tabLoading: false,
@@ -216,7 +225,9 @@ class NoteList extends React.Component {
       currentPage = this.state.tabPagination.current;
     }
 
-    let queryCondition = this.state.queryCondition;
+    let queryCondition = _.cloneDeep(this.state.queryCondition);
+    
+    queryCondition.todoStatus = queryCondition.todoStatus ? 1 : 0
     queryCondition.pageNum = currentPage;
     queryCondition.pageSize = this.state.tabPagination.pageSize;
     //queryCondition.sortField = this.state.tabSort.field;
@@ -274,7 +285,7 @@ class NoteList extends React.Component {
               key="3"
               onClick={() => {
                 // message.info(JSON.stringify(record));
-                this.toggleNoteState(record.noteId);
+                this.openFinishTimeModal(record.noteId,record.finishTime);
               }}
               icon={<CheckOutlined />}
             >
@@ -518,6 +529,46 @@ class NoteList extends React.Component {
     );
   };
 
+  setFinishTimeCurrent = () => {
+    const mmt = moment();
+    this.setState({
+      finishDateTemp: mmt,
+      finishTimeTemp: mmt,
+    });
+  };
+
+
+  finishTodo = () => {
+    const finishTimeStr = this.state.finishDateTemp.format('YYYY-MM-DD') + " " +this.state.finishTimeTemp.format('HH:mm')
+    // alert(finishTimeStr)
+    NoteApi.finishTodo(this.state.noteId,finishTimeStr).then( r=>{
+      console.log(r);
+      message.success("SUCCESS");
+      this.closeFinishTimeModal();
+      this.queryTabData();
+    });
+  }
+
+  closeFinishTimeModal = () =>{
+    this.setState({
+      finishTimeModalVisible : false,
+      noteId:''
+    })
+  }
+  openFinishTimeModal = (id,finishTime) => {
+    if(finishTime){
+      this.setState({
+        finishDateTemp:moment(finishTime,'YYYY-MM-DD HH:mm'),
+        finishTimeTemp:moment(finishTime,'YYYY-MM-DD HH:mm'),
+      })
+    }
+
+    this.setState({
+      noteId:id,
+      finishTimeModalVisible : true
+    })
+  }
+
   // =============================== render  =============================== //
   render() {
     const levelTagsObj = {};
@@ -613,7 +664,7 @@ class NoteList extends React.Component {
       </div>
     );
 
-    const calendarView = <NoteCalendar></NoteCalendar>
+    const calendarView = <NoteCalendar></NoteCalendar>;
 
     const listView = (
       <div>
@@ -727,8 +778,6 @@ class NoteList extends React.Component {
         </div>
       </div>
     );
-
-
 
     // ============== 高级搜索面板 =============== //
     const advanceSearch = (
@@ -847,13 +896,12 @@ class NoteList extends React.Component {
       </div>
     );
 
-
     const dataView = {
-      "LIST":listView,
-      "DETAIL":tableView,
-      "CALENDAR":calendarView
+      LIST: listView,
+      DETAIL: tableView,
+      CALENDAR: calendarView,
     };
-    
+
     // ============== 组件返回内容 =============== //
     return (
       <div>
@@ -861,43 +909,54 @@ class NoteList extends React.Component {
 
         <Row gutter={24}>
           <Col span={12}>
-          
-            
-            {this.state.viewType === 'LIST' ? 
-            <TableOutlined  style={{ fontSize: 16, color: "#1890ff" }} /> : 
-            <TableOutlined  style={{ fontSize: 14 ,cursor:"pointer"}} onClick={ () => {this.toggleViewType("LIST")}}/>
-            }
-            
-            <Divider type="vertical" />
-            {this.state.viewType === 'DETAIL' ? 
-            <UnorderedListOutlined  style={{ fontSize: 16, color: "#1890ff" }} /> : 
-            <UnorderedListOutlined  style={{ fontSize: 14 ,cursor:"pointer"}} onClick={ () => {this.toggleViewType("DETAIL")}}/>
-            }
+            {this.state.viewType === "LIST" ? (
+              <TableOutlined style={{ fontSize: 16, color: "#1890ff" }} />
+            ) : (
+              <TableOutlined
+                style={{ fontSize: 14, cursor: "pointer" }}
+                onClick={() => {
+                  this.toggleViewType("LIST");
+                }}
+              />
+            )}
 
-           
             <Divider type="vertical" />
-            {this.state.viewType === 'CALENDAR' ? 
-            <CalendarOutlined  style={{ fontSize: 16, color: "#1890ff" }} /> : 
-            <CalendarOutlined  style={{ fontSize: 14 ,cursor:"pointer"}} onClick={ () => {this.toggleViewType("CALENDAR")}}/>
-            }
-            
-               
-              
+            {this.state.viewType === "DETAIL" ? (
+              <UnorderedListOutlined
+                style={{ fontSize: 16, color: "#1890ff" }}
+              />
+            ) : (
+              <UnorderedListOutlined
+                style={{ fontSize: 14, cursor: "pointer" }}
+                onClick={() => {
+                  this.toggleViewType("DETAIL");
+                }}
+              />
+            )}
+
+            <Divider type="vertical" />
+            {this.state.viewType === "CALENDAR" ? (
+              <CalendarOutlined style={{ fontSize: 16, color: "#1890ff" }} />
+            ) : (
+              <CalendarOutlined
+                style={{ fontSize: 14, cursor: "pointer" }}
+                onClick={() => {
+                  this.toggleViewType("CALENDAR");
+                }}
+              />
+            )}
           </Col>
           <Col span={12}>
             {/* ======================= 搜索 ======================= */}
             <div className="tabTool">
-              <Select
-                defaultValue={0}
-                style={{ marginRight: 8, width: 120, textAlign: "left" }}
-                onChange={(v) => {
-                  this.createMode(v, "todoStatus");
-                  this.queryTabData(true);
-                }}
-              >
-                <Option value={0}>Finish</Option>
-                <Option value={1}>UnFinish</Option>
-              </Select>
+            
+              <Switch
+                style={{marginRight:8}}
+                checked = {this.state.queryCondition.todoStatus}
+                onChange={ (v) => {this.createMode(v, "todoStatus"); this.queryTabData();}}
+                checkedChildren="已完成"
+                unCheckedChildren="未完成"
+              />
 
               <Search
                 placeholder="Key Word"
@@ -1050,6 +1109,48 @@ class NoteList extends React.Component {
             canEdit={true}
             closeFn={this.closeNoteViewModal}
           ></NoteView>
+        </Modal>
+
+        <Modal
+          title="Finish Time"
+          visible={this.state.finishTimeModalVisible}
+          destroyOnClose={true}
+          onCancel={this.closeFinishTimeModal}
+          onOk={this.finishTodo}
+          maskClosable={false}
+        >
+          <dl className="form_col">
+            <dt>
+              Finish Time{" "}
+              <ClockCircleOutlined
+                onClick={this.setFinishTimeCurrent}
+                style={{ color: "#2db7f5", cursor: "pointer" }}
+              />
+            </dt>
+            <dd>
+              <DatePicker
+                style={{ width: "50%" }}
+                size={this.state.inputSize}
+                onChange={(m, dataStr) => {
+                  this.setState({
+                    finishDateTemp:m
+                  })
+                }}
+                value={this.state.finishDateTemp}
+              />
+              <TimePicker
+                style={{ width: "50%" }}
+                format={"HH:mm"}
+                size={this.state.inputSize}
+                onChange={(m, dataStr) => {
+                  this.setState({
+                    finishTimeTemp:m
+                  })
+                }}
+                value={this.state.finishTimeTemp}
+              />
+            </dd>
+          </dl>
         </Modal>
       </div>
     );
