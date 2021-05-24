@@ -9,6 +9,7 @@ import {
   Input,
   Row,
   Switch,
+  Tabs,
   Col,
   DatePicker,
   TimePicker,
@@ -18,18 +19,21 @@ import {
   Tag,
   InputNumber,
   Divider,
+  Upload,
   Rate,
 } from "antd";
 import {
   SaveOutlined,
   RollbackOutlined,
+  InboxOutlined,
   ClockCircleOutlined,
   RightOutlined,
   LeftOutlined,
 } from "@ant-design/icons";
 import DateUtils from "@/tools/DateUtils";
 import moment from "moment";
-
+const { Dragger } = Upload;
+const { TabPane } = Tabs;
 const { CheckableTag } = Tag;
 const levelTags = [
   { key: 5, value: "紧急", color: "#cf1322" },
@@ -51,14 +55,7 @@ class NoteForm extends React.Component {
     //   xl: 4,
     //   xxl: 3,
     // },
-    colSpan: {
-      xs: 24,
-      sm: 24,
-      md: 24,
-      lg: 24,
-      xl: 24,
-      xxl: 24,
-    },
+    colSpan: 24,
   };
 
   static propTypes = {
@@ -72,7 +69,7 @@ class NoteForm extends React.Component {
   static defaultProps = {
     noteId: "", //sex默认值为男
     canEdit: true, //age默认值为18
-    closeFn: () => {},
+    closeFn: () => { },
   };
   componentDidMount() {
     this.pageInit();
@@ -133,7 +130,7 @@ class NoteForm extends React.Component {
           }
           message.info("SUCCESS");
         })
-        .catch((r) => {});
+        .catch((r) => { });
     } else {
       NoteApi.updateNote(data)
         .then((r) => {
@@ -144,7 +141,7 @@ class NoteForm extends React.Component {
           }
           message.info("SUCCESS");
         })
-        .catch((r) => {});
+        .catch((r) => { });
     }
   };
 
@@ -210,11 +207,11 @@ class NoteForm extends React.Component {
       },
     });
   };
-  toggleFinish = (checked,evt) => {
-    if(checked){
-      this.createInputMode(1,"todoStatus")
-    }else{
-      this.createInputMode(0,"todoStatus")
+  toggleFinish = (checked, evt) => {
+    if (checked) {
+      this.createInputMode(1, "todoStatus")
+    } else {
+      this.createInputMode(0, "todoStatus")
     }
   }
   // 页面初始化
@@ -235,9 +232,9 @@ class NoteForm extends React.Component {
           rst.finishDateTemp = rst.finishTime.split(" ")[0];
           rst.finishTimeTemp = rst.finishTime.split(" ")[1];
         }
-        if(rst.todoStatus === 1){
+        if (rst.todoStatus === 1) {
           rst.todoStatus = true
-        }else{
+        } else {
           rst.todoStatus = false
         }
         this.setState({
@@ -259,14 +256,45 @@ class NoteForm extends React.Component {
 
   render() {
     const todoLevel = [this.state.formData.todoLevel];
+
+    const props = {
+      name: 'file',
+      multiple: true,
+      action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+      onChange(info) {
+        const { status } = info.file;
+        if (status !== 'uploading') {
+          console.log(info.file, info.fileList);
+        }
+        if (status === 'done') {
+          message.success(`${info.file.name} file uploaded successfully.`);
+        } else if (status === 'error') {
+          message.error(`${info.file.name} file upload failed.`);
+        }
+      },
+    };
+
+
+    const operations = (
+      <Rate
+        count={5}
+        value={this.state.formData.todoLevel}
+        tooltips={["不重要", "不紧急", "正常", "重要", "紧急"]}
+        onChange={(ct) => {
+          this.createInputMode(ct, "todoLevel");
+        }}
+      />
+    )
+
+
     return (
       <div>
         {/* {JSON.stringify(this.state.formData)} */}
         {/* <Editor></Editor> */}
         <Row gutter={24}>
-          <Col span={20}>
+          <Col span={19}>
             <Row gutter={24}>
-              <Col {...this.state.colSpan}>
+              <Col span="24">
                 <dl className="form_col">
                   <dd>
                     <Input
@@ -281,17 +309,44 @@ class NoteForm extends React.Component {
                 </dl>
               </Col>
 
-              <Col {...this.state.colSpan}>
-                {/* <Mde
+              <Col span="24">
+
+
+                <Tabs defaultActiveKey="1" tabBarExtraContent={operations}>
+                  <TabPane tab="Content" key="1">
+                    {/* <Mde
               change={this.mdChange}
               content={this.state.formData.content}
             ></Mde> */}
-                <MdEditor
-                  change={this.mdChange}
-                  content={this.state.formData.content}
-                ></MdEditor>
+                    <MdEditor
+                      change={this.mdChange}
+                      content={this.state.formData.content}
+                    ></MdEditor>
+                  </TabPane>
+                  <TabPane tab="Attachment" key="2">
+                    <Dragger {...props}>
+                      <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                      </p>
+                      <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                      <p className="ant-upload-hint">
+                        Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+                        band files
+    </p>
+                    </Dragger>
+                  </TabPane>
+
+                </Tabs>
+
+
+
               </Col>
-              <Col {...this.state.colSpan} style={{ display: "none" }}>
+
+
+
+
+
+              <Col span="24" style={{ display: "none" }}>
                 <dl className="form_col">
                   <dt>PK</dt>
                   <dd>
@@ -307,18 +362,19 @@ class NoteForm extends React.Component {
               </Col>
             </Row>
           </Col>
-          <Col span={4}>
-            <Col span={24} style={{ marginBottom: 8 }}>
-              <dl className="form_col">
-                <dd>
-                  <div
-                    style={{
-                      background: "#fffbe6",
-                      borderRadius: 5,
-                      padding: 8,
-                    }}
-                  >
-                    {/* <Radio.Group
+          <Col span={5}>
+            <Row gutter={24}>
+              <Col span={24} style={{ marginBottom: 8 }}>
+                <dl className="form_col">
+                  <dd>
+                    <div
+                      style={{
+                        background: "#fffbe6",
+                        borderRadius: 5,
+                        padding: 8,
+                      }}
+                    >
+                      {/* <Radio.Group
                       value={this.state.formData.classify}
                       buttonStyle="solid"
                       onChange={this.setClassify}
@@ -328,249 +384,253 @@ class NoteForm extends React.Component {
                       <Radio.Button value="Knowledge">Knowledge</Radio.Button>
                     </Radio.Group> */}
 
-                    <CheckableTag
-                      key="Todo"
-                      onChange={this.selectTag("Todo")}
-                      checked={this.state.formData.classify === "Todo"}
-                      icon={
-                        <FontAwesomeIcon
-                          icon="th-list"
-                          style={{
-                            fontSize: 14,
-                            paddingTop: 2,
-                            marginRight: 8,
-                            color: "#ffffff",
-                          }}
-                        />
-                      }
-                    >
-                      Todo
+                      <CheckableTag
+                        key="Todo"
+                        onChange={this.selectTag("Todo")}
+                        checked={this.state.formData.classify === "Todo"}
+                        icon={
+                          <FontAwesomeIcon
+                            icon="th-list"
+                            style={{
+                              fontSize: 14,
+                              paddingTop: 2,
+                              marginRight: 8,
+                              color: "#ffffff",
+                            }}
+                          />
+                        }
+                      >
+                        Todo
                     </CheckableTag>
 
-                    <CheckableTag
-                      key="Note"
-                      onChange={this.selectTag("Note")}
-                      checked={this.state.formData.classify === "Note"}
-                      icon={
-                        <FontAwesomeIcon
-                          icon="clipboard-list"
-                          style={{
-                            fontSize: 14,
-                            paddingTop: 2,
-                            marginRight: 8,
-                            color: "#ffffff",
-                          }}
-                        />
-                      }
-                    >
-                      Note
+                      <CheckableTag
+                        key="Note"
+                        onChange={this.selectTag("Note")}
+                        checked={this.state.formData.classify === "Note"}
+                        icon={
+                          <FontAwesomeIcon
+                            icon="clipboard-list"
+                            style={{
+                              fontSize: 14,
+                              paddingTop: 2,
+                              marginRight: 8,
+                              color: "#ffffff",
+                            }}
+                          />
+                        }
+                      >
+                        Note
                     </CheckableTag>
 
-                    <CheckableTag
-                      key="Knowledge"
-                      onChange={this.selectTag("Knowledge")}
-                      checked={this.state.formData.classify === "Knowledge"}
-                      icon={
-                        <FontAwesomeIcon
-                          icon="book"
-                          style={{
-                            fontSize: 14,
-                            paddingTop: 2,
-                            marginRight: 8,
-                            color: "#ffffff",
-                          }}
-                        />
-                      }
-                    >
-                      Knowledge
+                      <CheckableTag
+                        key="Knowledge"
+                        onChange={this.selectTag("Knowledge")}
+                        checked={this.state.formData.classify === "Knowledge"}
+                        icon={
+                          <FontAwesomeIcon
+                            icon="book"
+                            style={{
+                              fontSize: 14,
+                              paddingTop: 2,
+                              marginRight: 8,
+                              color: "#ffffff",
+                            }}
+                          />
+                        }
+                      >
+                        Knowledge
                     </CheckableTag>
+                    </div>
+                  </dd>
+                </dl>
+              </Col>
+              {/* <Col span={24} style={{ marginBottom: 8 }}>
+                
+              </Col> */}
+              <Col span={24} style={{ marginBottom: 8 }}>
+                {this.state.formData.classify === "Todo" ? (
+                  <div>
+                    <Divider></Divider>
+                    <Row gutter={24}>
+
+                      <Col span={24} style={{ marginBottom: 8 }}>
+                        <dl className="form_col">
+                          <dt>Expire Date</dt>
+                          <dd style={{ display: 'flex', alignItems: "center" }}>
+                            <LeftOutlined
+                              style={{ flex: "0 0 20", cursor: "pointer" }}
+                              onClick={this.subExpireDate}
+                            />
+                            <DatePicker
+                              style={{ flex: "1 1 auto", marginLeft: 8, marginRight: 8 }}
+                              size={this.state.inputSize}
+                              onChange={(moment, dataStr) => {
+                                this.createDateMode(dataStr, "expireDate");
+                              }}
+                              value={
+                                this.state.formData.expireDate
+                                  ? moment(
+                                    this.state.formData.expireDate,
+                                    "YYYY-MM-DD"
+                                  )
+                                  : null
+                              }
+                            />
+                            <RightOutlined
+                              style={{ flex: "0 0 20", cursor: "pointer" }}
+                              onClick={this.addExpireDate}
+                            />
+                          </dd>
+                        </dl>
+                      </Col>
+                      <Col span={24} style={{ marginBottom: 8 }}>
+                        <dl className="form_col">
+                          <dt>Alarm Days</dt>
+                          <dd>
+                            <InputNumber
+                              style={{ width: "100%" }}
+                              size={this.state.inputSize}
+                              value={this.state.formData.alarmDays}
+                              onChange={(v) => {
+                                this.createInputMode(v, "alarmDays");
+                              }}
+                            />
+                          </dd>
+                        </dl>
+                      </Col>
+                      <Col span={24} style={{ marginBottom: 8 }}>
+                        <dl className="form_col">
+                          <dt>
+                            Start Time{" "}
+                            <ClockCircleOutlined
+                              onClick={this.setStartTimeCurrent}
+                              style={{ color: "#2db7f5", cursor: "pointer" }}
+                            />
+                          </dt>
+                          <dd>
+                            <DatePicker
+                              style={{ width: "50%" }}
+                              size={this.state.inputSize}
+                              onChange={(moment, dataStr) => {
+                                this.createDateMode(dataStr, "startDateTemp");
+                              }}
+                              value={
+                                this.state.formData.startDateTemp
+                                  ? moment(
+                                    this.state.formData.startDateTemp,
+                                    "YYYY-MM-DD"
+                                  )
+                                  : null
+                              }
+                            />
+                            <TimePicker
+                              style={{ width: "50%" }}
+                              size={this.state.inputSize}
+                              format={"HH:mm"}
+                              onChange={(moment, dataStr) => {
+                                this.createDateMode(dataStr, "startTimeTemp");
+                              }}
+                              value={
+                                this.state.formData.startTimeTemp
+                                  ? moment(
+                                    this.state.formData.startTimeTemp,
+                                    "HH:mm"
+                                  )
+                                  : null
+                              }
+                            />
+                          </dd>
+                        </dl>
+                      </Col>
+                      <Col span={24} style={{ marginBottom: 8 }}>
+                        <dl className="form_col">
+                          <dt>
+                            Finish Time{" "}
+                            <ClockCircleOutlined
+                              onClick={this.setFinishTimeCurrent}
+                              style={{ color: "#2db7f5", cursor: "pointer" }}
+                            />
+                          </dt>
+                          <dd>
+                            <DatePicker
+                              style={{ width: "50%" }}
+                              size={this.state.inputSize}
+                              onChange={(moment, dataStr) => {
+                                this.createDateMode(dataStr, "finishDateTemp");
+                              }}
+                              value={
+                                this.state.formData.finishDateTemp
+                                  ? moment(
+                                    this.state.formData.finishDateTemp,
+                                    "YYYY-MM-DD"
+                                  )
+                                  : null
+                              }
+                            />
+                            <TimePicker
+                              style={{ width: "50%" }}
+                              format={"HH:mm"}
+                              size={this.state.inputSize}
+                              onChange={(moment, dataStr) => {
+                                this.createDateMode(dataStr, "finishTimeTemp");
+                              }}
+                              value={
+                                this.state.formData.finishTimeTemp
+                                  ? moment(
+                                    this.state.formData.finishTimeTemp,
+                                    "HH:mm"
+                                  )
+                                  : null
+                              }
+                            />
+                          </dd>
+                        </dl>
+                      </Col>
+                      <Col span={24} style={{ marginBottom: 8 }}>
+                        <dl className="form_row">
+                          <dt>Status</dt>
+                          <dd>
+                            <Switch
+                              checked={this.state.formData.todoStatus}
+                              onChange={this.toggleFinish}
+                              checkedChildren="已完成"
+                              unCheckedChildren="未完成"
+                            />
+                          </dd>
+                        </dl>
+                      </Col>
+                    </Row>
                   </div>
-                </dd>
-              </dl>
-            </Col>
-            <Col span={24} style={{ marginBottom: 8 }}>
-              <Rate
-                count={5}
-                value={this.state.formData.todoLevel}
-                tooltips={["不重要", "不紧急", "正常", "重要", "紧急"]}
-                onChange={(ct) => {
-                  this.createInputMode(ct, "todoLevel");
-                }}
-              />
-            </Col>
+                ) : null}
+              </Col>
+              <Col span={24} style={{ marginBottom: 8 }}>
 
-            {this.state.formData.classify === "Todo" ? (
-              <div>
-                <Divider></Divider>
-                <Row gutter={24}>
-                  <Col span={24} style={{ marginBottom: 8 }}>
-                    <dl className="form_row">
-                      <dt>Status</dt>
-                      <dd>
-                        <Switch
-                          checked = {this.state.formData.todoStatus}
-                          onChange={this.toggleFinish}
-                          checkedChildren="已完成"
-                          unCheckedChildren="未完成"
-                        />
-                      </dd>
-                    </dl>
-                  </Col>
-                  <Col span={24} style={{ marginBottom: 8 }}>
-                    <dl className="form_col">
-                      <dt>Expire Date</dt>
-                      <dd>
-                        <LeftOutlined
-                          style={{ cursor: "pointer" }}
-                          onClick={this.subExpireDate}
-                        />
-                        <DatePicker
-                          style={{ width: 120, marginLeft: 8, marginRight: 8 }}
-                          size={this.state.inputSize}
-                          onChange={(moment, dataStr) => {
-                            this.createDateMode(dataStr, "expireDate");
-                          }}
-                          value={
-                            this.state.formData.expireDate
-                              ? moment(
-                                  this.state.formData.expireDate,
-                                  "YYYY-MM-DD"
-                                )
-                              : null
-                          }
-                        />
-                        <RightOutlined
-                          style={{ cursor: "pointer" }}
-                          onClick={this.addExpireDate}
-                        />
-                      </dd>
-                    </dl>
-                  </Col>
-                  <Col span={24} style={{ marginBottom: 8 }}>
-                    <dl className="form_col">
-                      <dt>Alarm Days</dt>
-                      <dd>
-                        <InputNumber
-                          style={{ width: "100%" }}
-                          size={this.state.inputSize}
-                          value={this.state.formData.alarmDays}
-                          onChange={(v) => {
-                            this.createInputMode(v, "alarmDays");
-                          }}
-                        />
-                      </dd>
-                    </dl>
-                  </Col>
-                  <Col span={24} style={{ marginBottom: 8 }}>
-                    <dl className="form_col">
-                      <dt>
-                        Start Time{" "}
-                        <ClockCircleOutlined
-                          onClick={this.setStartTimeCurrent}
-                          style={{ color: "#2db7f5", cursor: "pointer" }}
-                        />
-                      </dt>
-                      <dd>
-                        <DatePicker
-                          style={{ width: "50%" }}
-                          size={this.state.inputSize}
-                          onChange={(moment, dataStr) => {
-                            this.createDateMode(dataStr, "startDateTemp");
-                          }}
-                          value={
-                            this.state.formData.startDateTemp
-                              ? moment(
-                                  this.state.formData.startDateTemp,
-                                  "YYYY-MM-DD"
-                                )
-                              : null
-                          }
-                        />
-                        <TimePicker
-                          style={{ width: "50%" }}
-                          size={this.state.inputSize}
-                          format={"HH:mm"}
-                          onChange={(moment, dataStr) => {
-                            this.createDateMode(dataStr, "startTimeTemp");
-                          }}
-                          value={
-                            this.state.formData.startTimeTemp
-                              ? moment(
-                                  this.state.formData.startTimeTemp,
-                                  "HH:mm"
-                                )
-                              : null
-                          }
-                        />
-                      </dd>
-                    </dl>
-                  </Col>
-                  <Col span={24} style={{ marginBottom: 8 }}>
-                    <dl className="form_col">
-                      <dt>
-                        Finish Time{" "}
-                        <ClockCircleOutlined
-                          onClick={this.setFinishTimeCurrent}
-                          style={{ color: "#2db7f5", cursor: "pointer" }}
-                        />
-                      </dt>
-                      <dd>
-                        <DatePicker
-                          style={{ width: "50%" }}
-                          size={this.state.inputSize}
-                          onChange={(moment, dataStr) => {
-                            this.createDateMode(dataStr, "finishDateTemp");
-                          }}
-                          value={
-                            this.state.formData.finishDateTemp
-                              ? moment(
-                                  this.state.formData.finishDateTemp,
-                                  "YYYY-MM-DD"
-                                )
-                              : null
-                          }
-                        />
-                        <TimePicker
-                          style={{ width: "50%" }}
-                          format={"HH:mm"}
-                          size={this.state.inputSize}
-                          onChange={(moment, dataStr) => {
-                            this.createDateMode(dataStr, "finishTimeTemp");
-                          }}
-                          value={
-                            this.state.formData.finishTimeTemp
-                              ? moment(
-                                  this.state.formData.finishTimeTemp,
-                                  "HH:mm"
-                                )
-                              : null
-                          }
-                        />
-                      </dd>
-                    </dl>
-                  </Col>
-                </Row>
-              </div>
-            ) : null}
+                <div>
+
+                  <Button
+                    block
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    onClick={this.saveNote}
+                  >
+                    Save
+            </Button>
+
+                  {/* <Button icon={<RollbackOutlined />} onClick={this.props.closeFn}>
+                      Cancel
+            </Button> */}
+
+                </div>
+
+              </Col>
+
+            </Row>
+
+
           </Col>
         </Row>
 
-        <Divider></Divider>
-        <div style={{ textAlign: "right" }}>
-          <Space>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              onClick={this.saveNote}
-            >
-              Save
-            </Button>
 
-            <Button icon={<RollbackOutlined />} onClick={this.props.closeFn}>
-              Cancel
-            </Button>
-          </Space>
-        </div>
       </div>
     );
   }

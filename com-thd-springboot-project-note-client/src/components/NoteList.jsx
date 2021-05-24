@@ -70,7 +70,7 @@ const levelTags = [
 
 class NoteList extends React.Component {
   state = {
-    noteId:'',
+    noteId: '',
     finishDateTemp: moment(),
     finishTimeTemp: moment(),
     finishTimeModalVisible: false,
@@ -80,7 +80,7 @@ class NoteList extends React.Component {
     // 查询条件
     queryCondition: {
       noteId: "",
-      todoStatus:false,
+      todoStatus: 0,
     },
     // loading状态
     tabLoading: false,
@@ -226,8 +226,10 @@ class NoteList extends React.Component {
     }
 
     let queryCondition = _.cloneDeep(this.state.queryCondition);
-    
-    queryCondition.todoStatus = queryCondition.todoStatus ? 1 : 0
+
+    // queryCondition.todoStatus = queryCondition.todoStatus ? 1 : 0
+    console.log(queryCondition)
+
     queryCondition.pageNum = currentPage;
     queryCondition.pageSize = this.state.tabPagination.pageSize;
     //queryCondition.sortField = this.state.tabSort.field;
@@ -285,7 +287,7 @@ class NoteList extends React.Component {
               key="3"
               onClick={() => {
                 // message.info(JSON.stringify(record));
-                this.openFinishTimeModal(record.noteId,record.finishTime);
+                this.openFinishTimeModal(record.noteId, record.finishTime);
               }}
               icon={<CheckOutlined />}
             >
@@ -458,13 +460,22 @@ class NoteList extends React.Component {
   };
 
   // 双向绑定
-  createMode = (v, propName) => {
-    this.setState({
-      queryCondition: {
-        ...this.state.queryCondition,
-        [propName]: v,
-      },
-    });
+  createMode = (v, propName, isQueryData) => {
+    if (isQueryData) {
+      this.setState({
+        queryCondition: {
+          ...this.state.queryCondition,
+          [propName]: v,
+        },
+      }, this.queryTabData);
+    } else {
+      this.setState({
+        queryCondition: {
+          ...this.state.queryCondition,
+          [propName]: v,
+        },
+      });
+    }
   };
 
   search = () => {
@@ -539,9 +550,9 @@ class NoteList extends React.Component {
 
 
   finishTodo = () => {
-    const finishTimeStr = this.state.finishDateTemp.format('YYYY-MM-DD') + " " +this.state.finishTimeTemp.format('HH:mm')
+    const finishTimeStr = this.state.finishDateTemp.format('YYYY-MM-DD') + " " + this.state.finishTimeTemp.format('HH:mm')
     // alert(finishTimeStr)
-    NoteApi.finishTodo(this.state.noteId,finishTimeStr).then( r=>{
+    NoteApi.finishTodo(this.state.noteId, finishTimeStr).then(r => {
       console.log(r);
       message.success("SUCCESS");
       this.closeFinishTimeModal();
@@ -549,23 +560,23 @@ class NoteList extends React.Component {
     });
   }
 
-  closeFinishTimeModal = () =>{
+  closeFinishTimeModal = () => {
     this.setState({
-      finishTimeModalVisible : false,
-      noteId:''
+      finishTimeModalVisible: false,
+      noteId: ''
     })
   }
-  openFinishTimeModal = (id,finishTime) => {
-    if(finishTime){
+  openFinishTimeModal = (id, finishTime) => {
+    if (finishTime) {
       this.setState({
-        finishDateTemp:moment(finishTime,'YYYY-MM-DD HH:mm'),
-        finishTimeTemp:moment(finishTime,'YYYY-MM-DD HH:mm'),
+        finishDateTemp: moment(finishTime, 'YYYY-MM-DD HH:mm'),
+        finishTimeTemp: moment(finishTime, 'YYYY-MM-DD HH:mm'),
       })
     }
 
     this.setState({
-      noteId:id,
-      finishTimeModalVisible : true
+      noteId: id,
+      finishTimeModalVisible: true
     })
   }
 
@@ -855,9 +866,9 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.expireDate
                       ? moment(
-                          this.state.queryCondition.expireDate,
-                          "YYYY-MM-DD"
-                        )
+                        this.state.queryCondition.expireDate,
+                        "YYYY-MM-DD"
+                      )
                       : null
                   }
                 />
@@ -905,7 +916,7 @@ class NoteList extends React.Component {
     // ============== 组件返回内容 =============== //
     return (
       <div>
-        {/* {JSON.stringify(this.state.selectedRowKeys)} */}
+        {/* {JSON.stringify(this.state.queryCondition)} */}
 
         <Row gutter={24}>
           <Col span={12}>
@@ -949,11 +960,11 @@ class NoteList extends React.Component {
           <Col span={12}>
             {/* ======================= 搜索 ======================= */}
             <div className="tabTool">
-            
+
               <Switch
-                style={{marginRight:8}}
-                checked = {this.state.queryCondition.todoStatus}
-                onChange={ (v) => {this.createMode(v, "todoStatus"); this.queryTabData();}}
+                style={{ marginRight: 8 }}
+                checked={this.state.queryCondition.todoStatus === 1}
+                onChange={(v) => { this.createMode(v ? 1 : 0, "todoStatus", true); }}
                 checkedChildren="已完成"
                 unCheckedChildren="未完成"
               />
@@ -1082,7 +1093,7 @@ class NoteList extends React.Component {
           title="Note Information"
           visible={this.state.formModalVisible}
           footer={null}
-          width={"80%"}
+          width={"95%"}
           style={{ top: 24 }}
           destroyOnClose={true}
           onCancel={this.closeNoteFormModal}
@@ -1133,7 +1144,7 @@ class NoteList extends React.Component {
                 size={this.state.inputSize}
                 onChange={(m, dataStr) => {
                   this.setState({
-                    finishDateTemp:m
+                    finishDateTemp: m
                   })
                 }}
                 value={this.state.finishDateTemp}
@@ -1144,7 +1155,7 @@ class NoteList extends React.Component {
                 size={this.state.inputSize}
                 onChange={(m, dataStr) => {
                   this.setState({
-                    finishTimeTemp:m
+                    finishTimeTemp: m
                   })
                 }}
                 value={this.state.finishTimeTemp}
