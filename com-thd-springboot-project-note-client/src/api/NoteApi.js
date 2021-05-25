@@ -2,7 +2,7 @@ import axios from '@/axios';
 
 const context = process.env.REACT_APP_CONTEXT
 export default {
-  
+  uploadUrl:`${context}/note/singleUpload`,
   queryNoteNoPage:function(data){
     return axios({
       method: 'get',
