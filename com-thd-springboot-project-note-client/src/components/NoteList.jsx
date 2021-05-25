@@ -69,7 +69,10 @@ const levelTags = [
 ];
 
 class NoteList extends React.Component {
+
+
   state = {
+    calendarQueryCondition:{},
     noteId: '',
     finishDateTemp: moment(),
     finishTimeTemp: moment(),
@@ -114,6 +117,10 @@ class NoteList extends React.Component {
     // note view modal visible
     viewModalVisible: false,
   };
+
+
+  calendarComponent= React.createRef();
+
 
   componentDidMount() {
     this.queryTabData();
@@ -206,6 +213,29 @@ class NoteList extends React.Component {
       this.queryTabData
     );
   };
+
+  calendarSearch = () => {
+    let queryCondition = _.cloneDeep(this.state.queryCondition);
+    
+    // 处理时间字段
+    if(queryCondition.startTimeFrom){
+      queryCondition.startTimeFrom = queryCondition.startTimeFrom + " 00:00:00"
+    }
+    if(queryCondition.startTimeTo){
+      queryCondition.startTimeTo = queryCondition.startTimeTo + " 23:59:59"
+    }
+    if(queryCondition.finishTimeFrom){
+      queryCondition.finishTimeFrom = queryCondition.finishTimeFrom + " 00:00:00"
+    }
+    if(queryCondition.finishTimeTo){
+      queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59"
+    }
+
+    this.setState({
+      calendarQueryCondition:queryCondition
+    })
+    
+  }
   // 查询列表数据 clearPage:是否清除分页信息
   queryTabData = (clearPage) => {
     this.setState({
@@ -226,6 +256,22 @@ class NoteList extends React.Component {
     }
 
     let queryCondition = _.cloneDeep(this.state.queryCondition);
+   
+    // this.calendarComponent.current.queryData();
+
+    // 处理时间字段
+    if(queryCondition.startTimeFrom){
+      queryCondition.startTimeFrom = queryCondition.startTimeFrom + " 00:00:00"
+    }
+    if(queryCondition.startTimeTo){
+      queryCondition.startTimeTo = queryCondition.startTimeTo + " 23:59:59"
+    }
+    if(queryCondition.finishTimeFrom){
+      queryCondition.finishTimeFrom = queryCondition.finishTimeFrom + " 00:00:00"
+    }
+    if(queryCondition.finishTimeTo){
+      queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59"
+    }
 
     // queryCondition.todoStatus = queryCondition.todoStatus ? 1 : 0
     console.log(queryCondition)
@@ -447,9 +493,14 @@ class NoteList extends React.Component {
 
   // 切换视图类型
   toggleViewType = (type) => {
+
+    
     this.setState({
       viewType: type,
     });
+    if(type === 'CALENDAR'){
+      this.calendarSearch();
+    }
   };
 
   // 高级搜索显示/隐藏 回调
@@ -675,7 +726,7 @@ class NoteList extends React.Component {
       </div>
     );
 
-    const calendarView = <NoteCalendar></NoteCalendar>;
+    const calendarView = <NoteCalendar ref={this.calendarComponent} cb={this.openNoteFormModal} queryCondition={this.state.calendarQueryCondition}></NoteCalendar>;
 
     const listView = (
       <div>
@@ -792,9 +843,9 @@ class NoteList extends React.Component {
 
     // ============== 高级搜索面板 =============== //
     const advanceSearch = (
-      <div style={{ width: 200 }}>
+      <div style={{ width: 300 }}>
         <Row gutter={24}>
-          <Col {...this.state.colSpan}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>ID</dt>
               <dd>
@@ -809,7 +860,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col {...this.state.colSpan}>
+          <Col  span={24}>
             <dl className="form_col">
               <dt>classify</dt>
               <dd>
@@ -824,7 +875,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col {...this.state.colSpan}>
+          <Col  span={24}>
             <dl className="form_col">
               <dt>title</dt>
               <dd>
@@ -839,7 +890,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col {...this.state.colSpan}>
+          <Col  span={24}>
             <dl className="form_col">
               <dt>content</dt>
               <dd>
@@ -854,19 +905,33 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col {...this.state.colSpan}>
+          <Col  span={24}>
             <dl className="form_col">
               <dt>expireDate</dt>
               <dd>
                 <DatePicker
                   size={this.state.inputSize}
                   onChange={(moment, dataStr) => {
-                    this.createMode(dataStr, "expireDate");
+                    this.createMode(dataStr, "expireDateFrom");
                   }}
                   value={
-                    this.state.queryCondition.expireDate
+                    this.state.queryCondition.expireDateFrom
                       ? moment(
-                        this.state.queryCondition.expireDate,
+                        this.state.queryCondition.expireDateFrom,
+                        "YYYY-MM-DD"
+                      )
+                      : null
+                  }
+                />
+                <DatePicker
+                  size={this.state.inputSize}
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "expireDateTo");
+                  }}
+                  value={
+                    this.state.queryCondition.expireDateTo
+                      ? moment(
+                        this.state.queryCondition.expireDateTo,
                         "YYYY-MM-DD"
                       )
                       : null
@@ -876,20 +941,81 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col {...this.state.colSpan}>
+
+          <Col  span={24}>
             <dl className="form_col">
-              <dt>alarmDays</dt>
+              <dt>Start Date</dt>
               <dd>
-                <Input
+                <DatePicker
                   size={this.state.inputSize}
-                  value={this.state.queryCondition.alarmDays}
-                  onChange={(e) => {
-                    this.createMode(e.target.value, "alarmDays");
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "startTimeFrom");
                   }}
+                  value={
+                    this.state.queryCondition.startTimeFrom
+                      ? moment(
+                        this.state.queryCondition.startTimeFrom,
+                        "YYYY-MM-DD"
+                      )
+                      : null
+                  }
+                />
+                <DatePicker
+                  size={this.state.inputSize}
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "startTimeTo");
+                  }}
+                  value={
+                    this.state.queryCondition.startTimeTo
+                      ? moment(
+                        this.state.queryCondition.startTimeTo,
+                        "YYYY-MM-DD"
+                      )
+                      : null
+                  }
                 />
               </dd>
             </dl>
           </Col>
+
+
+          <Col  span={24}>
+            <dl className="form_col">
+              <dt>Finish Date</dt>
+              <dd>
+                <DatePicker
+                  size={this.state.inputSize}
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "finishTimeFrom");
+                  }}
+                  value={
+                    this.state.queryCondition.finishTimeFrom
+                      ? moment(
+                        this.state.queryCondition.finishTimeFrom,
+                        "YYYY-MM-DD"
+                      )
+                      : null
+                  }
+                />
+                <DatePicker
+                  size={this.state.inputSize}
+                  onChange={(moment, dataStr) => {
+                    this.createMode(dataStr, "finishTimeTo");
+                  }}
+                  value={
+                    this.state.queryCondition.finishTimeTo
+                      ? moment(
+                        this.state.queryCondition.finishTimeTo,
+                        "YYYY-MM-DD"
+                      )
+                      : null
+                  }
+                />
+              </dd>
+            </dl>
+          </Col>
+
+         
         </Row>
         <Divider style={{ margin: "8px 0px" }}></Divider>
         <div style={{ textAlign: "center" }}>
@@ -1163,6 +1289,8 @@ class NoteList extends React.Component {
             </dd>
           </dl>
         </Modal>
+
+        {/* {calendarView} */}
       </div>
     );
   }

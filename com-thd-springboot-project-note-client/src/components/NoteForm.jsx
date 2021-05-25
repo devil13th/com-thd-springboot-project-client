@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoteApi from "@/api/NoteApi";
 import MdEditor from "./MdEditor";
 import Mde from "./Mde";
+import _ from 'lodash'
 import {
   message,
   Input,
@@ -112,7 +113,13 @@ class NoteForm extends React.Component {
     };
   };
   saveNote = () => {
-    const data = this.state.formData;
+    const data = _.cloneDeep(this.state.formData);
+
+    if(data.todoStatus === true){
+      data.todoStatus = 1
+    }else{
+      data.todoStatus = 0
+    }
     if (data.startTimeTemp) {
       data.startTime = data.startDateTemp + " " + data.startTimeTemp;
     }
@@ -166,8 +173,8 @@ class NoteForm extends React.Component {
     this.setState({
       formData: {
         ...this.state.formData,
-        startDateTemp: mmt,
-        startTimeTemp: mmt,
+        startDateTemp: mmt.format('YYYY-MM-DD'),
+        startTimeTemp: mmt.format('HH:mm'),
       },
     });
   };
@@ -177,8 +184,8 @@ class NoteForm extends React.Component {
     this.setState({
       formData: {
         ...this.state.formData,
-        finishDateTemp: mmt,
-        finishTimeTemp: mmt,
+        finishDateTemp: mmt.format('YYYY-MM-DD'),
+        finishTimeTemp: mmt.format('HH:mm'),
       },
     });
   };

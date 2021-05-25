@@ -2,6 +2,14 @@ import axios from '@/axios';
 
 const context = process.env.REACT_APP_CONTEXT
 export default {
+  
+  queryNoteNoPage:function(data){
+    return axios({
+      method: 'get',
+      url: `${context}/note/queryNoteNoPage`,
+      params:data
+    });
+  },
   queryNoteLikeByPage:function(data){
     return axios({
       method: 'get',
