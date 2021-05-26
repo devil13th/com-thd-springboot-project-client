@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, fatrash } from "@fortawesome/fontawesome-free-solid";
-
+// import NoteFullCalendar from './NoteFullCalendar'
 import {
   Menu,
   Modal,
@@ -1068,7 +1068,7 @@ class NoteList extends React.Component {
     return (
       <div>
         {/* {JSON.stringify(this.state.queryCondition)} */}
-
+        {/* <NoteFullCalendar></NoteFullCalendar> */}
         <Row gutter={24}>
           <Col span={12}>
             {this.state.viewType === "LIST" ? (
