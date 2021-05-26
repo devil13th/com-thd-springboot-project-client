@@ -256,8 +256,9 @@ class NoteList extends React.Component {
     }
 
     let queryCondition = _.cloneDeep(this.state.queryCondition);
-   
-    // this.calendarComponent.current.queryData();
+    
+    
+     
 
     // 处理时间字段
     if(queryCondition.startTimeFrom){
@@ -272,6 +273,18 @@ class NoteList extends React.Component {
     if(queryCondition.finishTimeTo){
       queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59"
     }
+
+    if(this.calendarComponent.current){
+      const calendarQueryCondition = _.cloneDeep(queryCondition)
+      delete calendarQueryCondition.startTimeFrom
+      delete calendarQueryCondition.startTimeTo
+      delete calendarQueryCondition.finishTimeFrom
+      delete calendarQueryCondition.finishTimeTo
+
+      console.log("calendar query condition", calendarQueryCondition)
+      this.calendarComponent.current.queryData(null,calendarQueryCondition);
+    }
+
 
     // queryCondition.todoStatus = queryCondition.todoStatus ? 1 : 0
     console.log(queryCondition)
