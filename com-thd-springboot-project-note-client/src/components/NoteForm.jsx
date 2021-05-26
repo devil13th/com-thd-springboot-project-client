@@ -115,11 +115,11 @@ class NoteForm extends React.Component {
   saveNote = () => {
     const data = _.cloneDeep(this.state.formData);
 
-    if(data.todoStatus === true){
-      data.todoStatus = 1
-    }else{
-      data.todoStatus = 0
-    }
+    // if(data.todoStatus === true){
+    //   data.todoStatus = 1
+    // }else{
+    //   data.todoStatus = 0
+    // }
     if (data.startTimeTemp) {
       data.startTime = data.startDateTemp + " " + data.startTimeTemp;
     }
@@ -214,13 +214,7 @@ class NoteForm extends React.Component {
       },
     });
   };
-  toggleFinish = (checked, evt) => {
-    if (checked) {
-      this.createInputMode(1, "todoStatus")
-    } else {
-      this.createInputMode(0, "todoStatus")
-    }
-  }
+ 
   // 页面初始化
   pageInit = () => {
     if (this.props.noteId) {
@@ -239,11 +233,11 @@ class NoteForm extends React.Component {
           rst.finishDateTemp = rst.finishTime.split(" ")[0];
           rst.finishTimeTemp = rst.finishTime.split(" ")[1];
         }
-        if (rst.todoStatus === 1) {
-          rst.todoStatus = true
-        } else {
-          rst.todoStatus = false
-        }
+        // if (rst.todoStatus === 1) {
+        //   rst.todoStatus = true
+        // } else {
+        //   rst.todoStatus = false
+        // }
         this.setState({
           formData: rst,
         });
@@ -598,8 +592,10 @@ class NoteForm extends React.Component {
                           <dt>Status</dt>
                           <dd>
                             <Switch
-                              checked={this.state.formData.todoStatus}
-                              onChange={this.toggleFinish}
+                              checked={this.state.formData.todoStatus === 1}
+                              onChange={(v) => {
+                                this.createInputMode(v ? 1 : 0, "todoStatus");
+                              }}
                               checkedChildren="已完成"
                               unCheckedChildren="未完成"
                             />

@@ -19,23 +19,26 @@ class NoteCalendar extends React.Component {
     value: moment(),
     selectedValue: moment(),
     selectedValue: moment(),
+    queryCondition:{}
   }
 
-  static propTypes = {
-    queryCondition:PropTypes.object,
-    cb:PropTypes.func
-  }
-  static defaultProps = {
-    queryCondition:{},
-    cb:() => {}
-  }
+  // static propTypes = {
+  //   queryCondition:PropTypes.object,
+  //   cb:PropTypes.func
+  // }
+  // static defaultProps = {
+  //   queryCondition:{},
+  //   cb:() => {}
+  // }
 
   
 
-  componentDidMount = () => {
-   this.queryData();
-
-  }
+  // componentDidMount = () => {
+  //   this.queryData();
+  //   this.setState({
+  //     queryCondition:this.props.queryCondition
+  //   })
+  // }
 
   headerRender = ({value,onChange}) => {
     onChange(value)
@@ -48,16 +51,27 @@ class NoteCalendar extends React.Component {
     })
   }
 
-  queryData = (date,thisQueryCondition) => {
+  setQueryCondition = (queryCondition) => {
+    let condition = _.cloneDeep(queryCondition)
+    delete condition.startTimeFrom
+    delete condition.startTimeTo
+    delete condition.finishTimeFrom
+    delete condition.finishTimeTo
+    
+    this.setState({
+      queryCondition:condition
+    },this.queryData)
+  }
+
+  queryData = () => {
+    
     this.setState({
       spinning:true
-    })
-    let condition = thisQueryCondition ? thisQueryCondition : _.cloneDeep(this.props.queryCondition)
+    }) 
     
-    let current = moment();
-    if(date){
-      current = moment(date.format('YYYY-MM-DD'),'YYYY-MM-DD');
-    }
+    let condition = _.cloneDeep(this.state.queryCondition)
+
+    let current = moment(this.state.value.format('YYYY-MM-DD'),'YYYY-MM-DD') ;// clone日期,防止current改变后导致state.value改变
 
     condition.expireDateFrom = current.format("YYYY-MM") + "-01 00:00:00"
 
@@ -79,6 +93,63 @@ class NoteCalendar extends React.Component {
         });
       });
   }
+  
+  // queryData = (date,thisQueryCondition) => {
+    
+  //   this.setState({
+  //     spinning:true
+  //   }) 
+    
+  //   let condition = _.cloneDeep(this.state.queryCondition)
+
+  //   if(thisQueryCondition){
+
+  //     condition = thisQueryCondition;
+  //     this.setState({
+  //       queryCondition : thisQueryCondition
+  //     })
+
+  //   }
+  //   //let condition = thisQueryCondition ? thisQueryCondition : _.cloneDeep(this.props.queryCondition)
+
+
+  //   delete condition.startTimeFrom
+  //   delete condition.startTimeTo
+  //   delete condition.finishTimeFrom
+  //   delete condition.finishTimeTo
+
+  //   let current = moment(this.state.value.format('YYYY-MM-DD'),'YYYY-MM-DD') ;// clone日期,防止current改变后导致state.value改变
+
+   
+  //   if(date){
+  //     current = moment(date.format('YYYY-MM-DD'),'YYYY-MM-DD'); // clone日期,防止current改变后导致date改变
+  //     this.setState({
+  //       value:date
+  //     })
+  //   }
+
+  //   condition.expireDateFrom = current.format("YYYY-MM") + "-01 00:00:00"
+
+  //   let nextMonth = current.add(1,"months")
+  //   condition.expireDateTo = nextMonth.format("YYYY-MM") + "-01 00:00:00"
+
+ 
+  //   NoteApi.queryNoteLikeByPage(condition)
+  //     .then((r) => {
+  //       this.setState({
+  //         data:  r.result.list,
+  //         spinning:false
+  //       });
+  //     })
+  //     .catch((r) => {
+  //       message.error("error! " + r);
+  //       this.setState({
+  //         spinning: false,
+  //       });
+  //     });
+  // }
+
+  
 
 
  
@@ -91,8 +162,8 @@ class NoteCalendar extends React.Component {
   onPanelChange = (value,mode) => {
     console.log(value.format('YYYY-MM-DD'));
     console.log(mode)
-    this.setState({ value });
-    this.queryData(value)
+    this.setState({ value },this.queryData);
+    
   }
 
 

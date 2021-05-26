@@ -35,7 +35,7 @@ import DateUtils from "@/tools/DateUtils";
 import NoteForm from "./NoteForm";
 import NoteView from "./NoteView";
 import moment from "moment";
-import _ from 'lodash'
+import _ from "lodash";
 import {
   SearchOutlined,
   ClockCircleOutlined,
@@ -69,17 +69,15 @@ const levelTags = [
 ];
 
 class NoteList extends React.Component {
-
-
   state = {
-    calendarQueryCondition:{},
-    noteId: '',
+    calendarQueryCondition: {},
+    noteId: "",
     finishDateTemp: moment(),
     finishTimeTemp: moment(),
     finishTimeModalVisible: false,
     advanceSearchVisible: false,
     colSpan: 24,
-    viewType: "DETAIL", // LIST DETAIL CALENDAR
+    viewType: "CALENDAR", // LIST DETAIL CALENDAR
     // 查询条件
     queryCondition: {
       noteId: "",
@@ -118,9 +116,7 @@ class NoteList extends React.Component {
     viewModalVisible: false,
   };
 
-
-  calendarComponent= React.createRef();
-
+  calendarComponent = React.createRef();
 
   componentDidMount() {
     this.queryTabData();
@@ -216,26 +212,26 @@ class NoteList extends React.Component {
 
   calendarSearch = () => {
     let queryCondition = _.cloneDeep(this.state.queryCondition);
-    
+
     // 处理时间字段
-    if(queryCondition.startTimeFrom){
-      queryCondition.startTimeFrom = queryCondition.startTimeFrom + " 00:00:00"
+    if (queryCondition.startTimeFrom) {
+      queryCondition.startTimeFrom = queryCondition.startTimeFrom + " 00:00:00";
     }
-    if(queryCondition.startTimeTo){
-      queryCondition.startTimeTo = queryCondition.startTimeTo + " 23:59:59"
+    if (queryCondition.startTimeTo) {
+      queryCondition.startTimeTo = queryCondition.startTimeTo + " 23:59:59";
     }
-    if(queryCondition.finishTimeFrom){
-      queryCondition.finishTimeFrom = queryCondition.finishTimeFrom + " 00:00:00"
+    if (queryCondition.finishTimeFrom) {
+      queryCondition.finishTimeFrom =
+        queryCondition.finishTimeFrom + " 00:00:00";
     }
-    if(queryCondition.finishTimeTo){
-      queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59"
+    if (queryCondition.finishTimeTo) {
+      queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59";
     }
 
-    this.setState({
-      calendarQueryCondition:queryCondition
-    })
-    
-  }
+    // this.setState({
+    //   calendarQueryCondition:queryCondition
+    // })
+  };
   // 查询列表数据 clearPage:是否清除分页信息
   queryTabData = (clearPage) => {
     this.setState({
@@ -256,38 +252,29 @@ class NoteList extends React.Component {
     }
 
     let queryCondition = _.cloneDeep(this.state.queryCondition);
-    
-    
-     
 
     // 处理时间字段
-    if(queryCondition.startTimeFrom){
-      queryCondition.startTimeFrom = queryCondition.startTimeFrom + " 00:00:00"
+    if (queryCondition.startTimeFrom) {
+      queryCondition.startTimeFrom = queryCondition.startTimeFrom + " 00:00:00";
     }
-    if(queryCondition.startTimeTo){
-      queryCondition.startTimeTo = queryCondition.startTimeTo + " 23:59:59"
+    if (queryCondition.startTimeTo) {
+      queryCondition.startTimeTo = queryCondition.startTimeTo + " 23:59:59";
     }
-    if(queryCondition.finishTimeFrom){
-      queryCondition.finishTimeFrom = queryCondition.finishTimeFrom + " 00:00:00"
+    if (queryCondition.finishTimeFrom) {
+      queryCondition.finishTimeFrom =
+        queryCondition.finishTimeFrom + " 00:00:00";
     }
-    if(queryCondition.finishTimeTo){
-      queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59"
-    }
-
-    if(this.calendarComponent.current){
-      const calendarQueryCondition = _.cloneDeep(queryCondition)
-      delete calendarQueryCondition.startTimeFrom
-      delete calendarQueryCondition.startTimeTo
-      delete calendarQueryCondition.finishTimeFrom
-      delete calendarQueryCondition.finishTimeTo
-
-      console.log("calendar query condition", calendarQueryCondition)
-      this.calendarComponent.current.queryData(null,calendarQueryCondition);
+    if (queryCondition.finishTimeTo) {
+      queryCondition.finishTimeTo = queryCondition.finishTimeTo + " 23:59:59";
     }
 
+    console.log("----", queryCondition);
+
+    if (this.calendarComponent.current) {
+      this.calendarComponent.current.setQueryCondition(queryCondition);
+    }
 
     // queryCondition.todoStatus = queryCondition.todoStatus ? 1 : 0
-    console.log(queryCondition)
 
     queryCondition.pageNum = currentPage;
     queryCondition.pageSize = this.state.tabPagination.pageSize;
@@ -506,14 +493,9 @@ class NoteList extends React.Component {
 
   // 切换视图类型
   toggleViewType = (type) => {
-
-    
     this.setState({
       viewType: type,
     });
-    if(type === 'CALENDAR'){
-      this.calendarSearch();
-    }
   };
 
   // 高级搜索显示/隐藏 回调
@@ -526,12 +508,15 @@ class NoteList extends React.Component {
   // 双向绑定
   createMode = (v, propName, isQueryData) => {
     if (isQueryData) {
-      this.setState({
-        queryCondition: {
-          ...this.state.queryCondition,
-          [propName]: v,
+      this.setState(
+        {
+          queryCondition: {
+            ...this.state.queryCondition,
+            [propName]: v,
+          },
         },
-      }, this.queryTabData);
+        this.queryTabData
+      );
     } else {
       this.setState({
         queryCondition: {
@@ -612,37 +597,39 @@ class NoteList extends React.Component {
     });
   };
 
-
   finishTodo = () => {
-    const finishTimeStr = this.state.finishDateTemp.format('YYYY-MM-DD') + " " + this.state.finishTimeTemp.format('HH:mm')
+    const finishTimeStr =
+      this.state.finishDateTemp.format("YYYY-MM-DD") +
+      " " +
+      this.state.finishTimeTemp.format("HH:mm");
     // alert(finishTimeStr)
-    NoteApi.finishTodo(this.state.noteId, finishTimeStr).then(r => {
+    NoteApi.finishTodo(this.state.noteId, finishTimeStr).then((r) => {
       console.log(r);
       message.success("SUCCESS");
       this.closeFinishTimeModal();
       this.queryTabData();
     });
-  }
+  };
 
   closeFinishTimeModal = () => {
     this.setState({
       finishTimeModalVisible: false,
-      noteId: ''
-    })
-  }
+      noteId: "",
+    });
+  };
   openFinishTimeModal = (id, finishTime) => {
     if (finishTime) {
       this.setState({
-        finishDateTemp: moment(finishTime, 'YYYY-MM-DD HH:mm'),
-        finishTimeTemp: moment(finishTime, 'YYYY-MM-DD HH:mm'),
-      })
+        finishDateTemp: moment(finishTime, "YYYY-MM-DD HH:mm"),
+        finishTimeTemp: moment(finishTime, "YYYY-MM-DD HH:mm"),
+      });
     }
 
     this.setState({
       noteId: id,
-      finishTimeModalVisible: true
-    })
-  }
+      finishTimeModalVisible: true,
+    });
+  };
 
   // =============================== render  =============================== //
   render() {
@@ -719,6 +706,7 @@ class NoteList extends React.Component {
     const tableView = (
       <div
         style={{
+          display: this.state.viewType === "DETAIL" ? "block" : "none",
           background: "#ecf0f5",
           borderRadius: 3,
           padding: 8,
@@ -739,10 +727,23 @@ class NoteList extends React.Component {
       </div>
     );
 
-    const calendarView = <NoteCalendar ref={this.calendarComponent} cb={this.openNoteFormModal} queryCondition={this.state.calendarQueryCondition}></NoteCalendar>;
-
+    const calendarView = (
+      <div
+        style={{
+          display: this.state.viewType === "CALENDAR" ? "block" : "none",
+        }}
+      >
+        <NoteCalendar
+          ref={this.calendarComponent}
+          cb={this.openNoteFormModal}
+          queryCondition={this.state.queryCondition}
+        ></NoteCalendar>
+      </div>
+    );
     const listView = (
-      <div>
+      <div
+        style={{ display: this.state.viewType === "LIST" ? "block" : "none" }}
+      >
         <div
           style={{
             display: "flex",
@@ -854,6 +855,12 @@ class NoteList extends React.Component {
       </div>
     );
 
+    const dataView = {
+      LIST: listView,
+      DETAIL: tableView,
+      CALENDAR: calendarView,
+    };
+
     // ============== 高级搜索面板 =============== //
     const advanceSearch = (
       <div style={{ width: 300 }}>
@@ -873,7 +880,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col  span={24}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>classify</dt>
               <dd>
@@ -888,7 +895,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col  span={24}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>title</dt>
               <dd>
@@ -903,7 +910,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col  span={24}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>content</dt>
               <dd>
@@ -918,7 +925,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col  span={24}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>expireDate</dt>
               <dd>
@@ -930,9 +937,9 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.expireDateFrom
                       ? moment(
-                        this.state.queryCondition.expireDateFrom,
-                        "YYYY-MM-DD"
-                      )
+                          this.state.queryCondition.expireDateFrom,
+                          "YYYY-MM-DD"
+                        )
                       : null
                   }
                 />
@@ -944,9 +951,9 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.expireDateTo
                       ? moment(
-                        this.state.queryCondition.expireDateTo,
-                        "YYYY-MM-DD"
-                      )
+                          this.state.queryCondition.expireDateTo,
+                          "YYYY-MM-DD"
+                        )
                       : null
                   }
                 />
@@ -954,8 +961,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-
-          <Col  span={24}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>Start Date</dt>
               <dd>
@@ -967,9 +973,9 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.startTimeFrom
                       ? moment(
-                        this.state.queryCondition.startTimeFrom,
-                        "YYYY-MM-DD"
-                      )
+                          this.state.queryCondition.startTimeFrom,
+                          "YYYY-MM-DD"
+                        )
                       : null
                   }
                 />
@@ -981,9 +987,9 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.startTimeTo
                       ? moment(
-                        this.state.queryCondition.startTimeTo,
-                        "YYYY-MM-DD"
-                      )
+                          this.state.queryCondition.startTimeTo,
+                          "YYYY-MM-DD"
+                        )
                       : null
                   }
                 />
@@ -991,8 +997,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-
-          <Col  span={24}>
+          <Col span={24}>
             <dl className="form_col">
               <dt>Finish Date</dt>
               <dd>
@@ -1004,9 +1009,9 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.finishTimeFrom
                       ? moment(
-                        this.state.queryCondition.finishTimeFrom,
-                        "YYYY-MM-DD"
-                      )
+                          this.state.queryCondition.finishTimeFrom,
+                          "YYYY-MM-DD"
+                        )
                       : null
                   }
                 />
@@ -1018,17 +1023,15 @@ class NoteList extends React.Component {
                   value={
                     this.state.queryCondition.finishTimeTo
                       ? moment(
-                        this.state.queryCondition.finishTimeTo,
-                        "YYYY-MM-DD"
-                      )
+                          this.state.queryCondition.finishTimeTo,
+                          "YYYY-MM-DD"
+                        )
                       : null
                   }
                 />
               </dd>
             </dl>
           </Col>
-
-         
         </Row>
         <Divider style={{ margin: "8px 0px" }}></Divider>
         <div style={{ textAlign: "center" }}>
@@ -1046,11 +1049,20 @@ class NoteList extends React.Component {
       </div>
     );
 
-    const dataView = {
-      LIST: listView,
-      DETAIL: tableView,
-      CALENDAR: calendarView,
-    };
+    const statusSelect = (
+      <Select
+        allowClear
+        style={{ width: 90, marginRight: 4 }}
+        placeholder="Status"
+        value={this.state.queryCondition.todoStatus}
+        onChange={(v) => {
+          this.createMode(v, "todoStatus", true);
+        }}
+      >
+        <Option value={0}>未完成</Option>
+        <Option value={1}>已完成</Option>
+      </Select>
+    );
 
     // ============== 组件返回内容 =============== //
     return (
@@ -1099,18 +1111,18 @@ class NoteList extends React.Component {
           <Col span={12}>
             {/* ======================= 搜索 ======================= */}
             <div className="tabTool">
-
-              <Switch
+              {/* <Switch
                 style={{ marginRight: 8 }}
                 checked={this.state.queryCondition.todoStatus === 1}
                 onChange={(v) => { this.createMode(v ? 1 : 0, "todoStatus", true); }}
                 checkedChildren="已完成"
                 unCheckedChildren="未完成"
-              />
+              /> */}
 
               <Search
+                addonBefore={statusSelect}
                 placeholder="Key Word"
-                style={{ width: 200, marginRight: 8 }}
+                style={{ width: 300, marginRight: 8 }}
                 onSearch={this.onSearch}
                 onChange={this.keyWordsChange}
                 suffix={
@@ -1225,7 +1237,9 @@ class NoteList extends React.Component {
           ></Alert>
         ) : null}
 
-        {dataView[this.state.viewType]}
+        {listView}
+        {tableView}
+        {calendarView}
 
         {/* ======================= modal窗口 ======================= */}
         <Modal
@@ -1283,8 +1297,8 @@ class NoteList extends React.Component {
                 size={this.state.inputSize}
                 onChange={(m, dataStr) => {
                   this.setState({
-                    finishDateTemp: m
-                  })
+                    finishDateTemp: m,
+                  });
                 }}
                 value={this.state.finishDateTemp}
               />
@@ -1294,8 +1308,8 @@ class NoteList extends React.Component {
                 size={this.state.inputSize}
                 onChange={(m, dataStr) => {
                   this.setState({
-                    finishTimeTemp: m
-                  })
+                    finishTimeTemp: m,
+                  });
                 }}
                 value={this.state.finishTimeTemp}
               />
