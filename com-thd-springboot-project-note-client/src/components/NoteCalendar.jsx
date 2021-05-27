@@ -1,7 +1,7 @@
 import React from 'react'
-import { Calendar,Spin, Badge,Tooltip,Rate,DatePicker } from 'antd';
+import { message,Button,Calendar,Spin, Badge,Tooltip,Rate,DatePicker } from 'antd';
 import NoteApi from "@/api/NoteApi";
-import {message} from 'antd';
+
 
 import PropTypes from "prop-types";
 import _ from 'lodash'
@@ -17,7 +17,6 @@ class NoteCalendar extends React.Component {
     spinning:false,
     data:[],
     value: moment(),
-    selectedValue: moment(),
     selectedValue: moment(),
     queryCondition:{}
   }
@@ -241,6 +240,13 @@ class NoteCalendar extends React.Component {
 
   }
 
+  dataChange = () => {
+    alert(2)
+    this.setState({
+      selectedValue:moment('2021-01-01','YYYY-MM-DD')
+    })
+  }
+
   render() {
     // console.log("calendar render ...")
     const _this = this;
@@ -263,6 +269,7 @@ class NoteCalendar extends React.Component {
     }
     return (
       <div>
+        {/* <Button onClick={this.dataChange}>xx</Button> */}
         <Spin tip="Loading..." spinning={this.state.spinning}>
         {this.state.value.format("YYYY-MM-DD")}
           <Calendar  

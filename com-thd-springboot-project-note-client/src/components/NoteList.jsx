@@ -82,6 +82,7 @@ class NoteList extends React.Component {
     queryCondition: {
       noteId: "",
       todoStatus: 0,
+      classify:'Todo'
     },
     // loading状态
     tabLoading: false,
@@ -643,15 +644,13 @@ class NoteList extends React.Component {
       {
         title: "classify",
         dataIndex: "classify",
-        key: "classify",
-        sorter: true,
+        key: "classify"
       },
       {
         title: "title",
         width: 500,
         dataIndex: "title",
-        key: "title",
-        sorter: true,
+        key: "title"
       },
       // {
       //   title: "content",
@@ -663,16 +662,26 @@ class NoteList extends React.Component {
         title: "expireDate",
         dataIndex: "expireDate",
         key: "expireDate",
-        sorter: true,
         render: (text, record, index) => {
           return DateUtils.formatToDate(text);
         },
       },
       {
-        title: "alarmDays",
-        dataIndex: "alarmDays",
-        key: "alarmDays",
-        sorter: true,
+        title: "Status",
+        dataIndex: "todoStatus",
+        key: "todoStatus",
+        render: (text, record, index) => {
+
+          if(record.classify === 'Todo'){
+            if(record.todoStatus === 0){
+              return <Tag color="#f00" style={{width:54}}>未完成</Tag>
+            }else{
+              return <Tag color="#87d068" style={{width:54}}>已完成</Tag>
+            }
+          }else{
+            return <Tag color="#2db7f5" style={{width:54,textAlign:'center'}}> - </Tag>
+          }
+        },
       },
       {
         title: "Operate",
@@ -880,7 +889,7 @@ class NoteList extends React.Component {
             </dl>
           </Col>
 
-          <Col span={24}>
+          {/* <Col span={24}>
             <dl className="form_col">
               <dt>classify</dt>
               <dd>
@@ -893,7 +902,7 @@ class NoteList extends React.Component {
                 />
               </dd>
             </dl>
-          </Col>
+          </Col> */}
 
           <Col span={24}>
             <dl className="form_col">
@@ -1050,18 +1059,33 @@ class NoteList extends React.Component {
     );
 
     const statusSelect = (
-      <Select
-        allowClear
-        style={{ width: 90, marginRight: 4 }}
-        placeholder="Status"
-        value={this.state.queryCondition.todoStatus}
-        onChange={(v) => {
-          this.createMode(v, "todoStatus", true);
-        }}
-      >
-        <Option value={0}>未完成</Option>
-        <Option value={1}>已完成</Option>
-      </Select>
+      <div>
+        <Select
+          allowClear
+          style={{ width: 90, marginRight: 4 }}
+          placeholder="Classify"
+          value={this.state.queryCondition.classify}
+          onChange={(v) => {
+            this.createMode(v, "classify", true);
+          }}
+        >
+          <Option value="Todo">Todo</Option>
+          <Option value="Note">Note</Option>
+        </Select>
+            <Divider type="vertical"></Divider>
+        <Select
+          allowClear
+          style={{ width: 90, marginRight: 4 }}
+          placeholder="Status"
+          value={this.state.queryCondition.todoStatus}
+          onChange={(v) => {
+            this.createMode(v, "todoStatus", true);
+          }}
+        >
+          <Option value={0}>未完成</Option>
+          <Option value={1}>已完成</Option>
+        </Select>
+      </div>
     );
 
     // ============== 组件返回内容 =============== //
@@ -1122,7 +1146,7 @@ class NoteList extends React.Component {
               <Search
                 addonBefore={statusSelect}
                 placeholder="Key Word"
-                style={{ width: 300, marginRight: 8 }}
+                style={{ width: 390, marginRight: 8 }}
                 onSearch={this.onSearch}
                 onChange={this.keyWordsChange}
                 suffix={
