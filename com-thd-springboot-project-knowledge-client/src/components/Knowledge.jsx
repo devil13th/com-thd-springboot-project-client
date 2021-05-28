@@ -1,6 +1,7 @@
 import React from "react";
-import { Input, Menu, Row, Col, Modal, Empty, message } from "antd";
+import {Popconfirm, Input, Menu, Row, Col, Modal, Empty, message } from "antd";
 import {
+  DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
   EditOutlined,
@@ -23,6 +24,10 @@ class Knowledge extends React.Component {
     dataList: [],
     current: "",
     docVisible: false,
+    data: {
+      content: "",
+      classify: [],
+    },
   };
   onSearch = (keyWord) => {
     this.setState({ keyWord });
@@ -50,10 +55,20 @@ class Knowledge extends React.Component {
       docVisible: true,
     });
   };
+  createNewDoc = () => {
+    this.setState({
+      data:{
+        classify:[],
+        content:''
+      },
+      docVisible: true,
+    })
+  }
   createDocIndex = () => {
     API.createDocIndex().then(
       (r) => {
         console.log(r);
+        message.success("Index Be Created Success");
       },
       (err) => {
         debugger;
@@ -61,9 +76,33 @@ class Knowledge extends React.Component {
       }
     );
   };
+
+  deleteDocIndex = () => {
+    API.deleteDocIndex().then(
+      (r) => {
+        console.log(r);
+        message.success("Index Be Deleted Success");
+      },
+      (err) => {
+        message.error(err.message);
+      }
+    );
+  };
   indexThdTecFile = () => {
     API.indexThdTecFile().then((r) => {
       message.success("SUCCESS");
+    });
+  };
+  detail = (id) => {
+    API.loadDocById(id).then((r) => {
+      let rst = r.result;
+      if (rst.classify) {
+        rst.classify = rst.classify.split(",");
+      }
+      this.setState({
+        data: rst,
+        docVisible: true,
+      });
     });
   };
   render() {
@@ -90,9 +129,22 @@ class Knowledge extends React.Component {
     const result = this.state.dataList.map((item, index) => {
       return (
         <dl key={index}>
-          <dt style={{fontSize:18}}>{item.title}</dt>
+          <dt>
+            <span
+              style={{ color: "#108ee9", fontSize: 18, cursor: "pointer" }}
+              onClick={() => {
+                this.detail(item.id);
+              }}
+            >
+              {item.title}
+            </span>
+          </dt>
           <dd>
-            <div> {item.desc}</div>
+            <div>
+              Description:{item.desc}
+              <br />
+              FilePath:{item.filePath}
+            </div>
             {item.highLight ? (
               <ul>
                 {item.highLight.map((hl, idx) => {
@@ -107,7 +159,7 @@ class Knowledge extends React.Component {
       );
     });
 
-    const emptyData = <Empty style={{marginTop:32}}/>;
+    const emptyData = <Empty style={{ marginTop: 32 }} />;
     return (
       <div
         style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
@@ -130,7 +182,7 @@ class Knowledge extends React.Component {
                 <Menu.Item
                   key="app"
                   icon={<EditOutlined />}
-                  onClick={this.openDocVisible}
+                  onClick={this.createNewDoc}
                 >
                   Create New Doc
                 </Menu.Item>
@@ -163,6 +215,20 @@ class Knowledge extends React.Component {
                       Create Index
                     </Menu.Item>
                     <Menu.Item
+                      key="setting:deleteDocIndex"
+                      icon={<DeleteOutlined />}
+                    >
+                      <Popconfirm
+                        title="Are you sure to delete index ?"
+                        onConfirm={this.deleteDocIndex}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <a href="#">Delete Index</a>
+                      </Popconfirm>
+                    </Menu.Item>
+
+                    <Menu.Item
                       key="setting:indexThdTecFile"
                       icon={<DeploymentUnitOutlined />}
                       onClick={this.indexThdTecFile}
@@ -175,15 +241,14 @@ class Knowledge extends React.Component {
             </div>
           </div>
 
-          
-            {/* 首页搜索 */}
-            {!hasResult ? (
-              <div style={{ marginTop: 100, width: 500, margin: "0px auto" }}>
-                <img src={logoUrl.default} height="30" />
-                {search}
-              </div>
-            ) : null}
-          <div style={{ marginTop: 100,  margin: "0px 100px" }}>
+          {/* 首页搜索 */}
+          {!hasResult ? (
+            <div style={{ marginTop: 100, width: 500, margin: "0px auto" }}>
+              <img src={logoUrl.default} height="30" />
+              {search}
+            </div>
+          ) : null}
+          <div style={{ marginTop: 100, margin: "0px 100px" }}>
             {hasResult ? result : emptyData}
           </div>
         </div>
@@ -200,11 +265,12 @@ class Knowledge extends React.Component {
           width={"80%"}
           style={{ top: 24 }}
           destroyOnClose={true}
+          footer={null}
           onCancel={this.closeDocVisible}
           maskClosable={false}
           okText={`Create Document`}
         >
-          <Doc></Doc>
+          <Doc data={this.state.data} cb={this.closeDocVisible}></Doc>
         </Modal>
       </div>
     );

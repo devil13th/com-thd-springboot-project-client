@@ -28,6 +28,18 @@ export default {
       method: 'get',
       url: `${context}/knowledge/indexThdTecFile`
     });
+  },
+  loadDocById:function(id){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/loadDocById/${id}`
+    });
+  },
+  deleteDocIndex:function(){
+    return axios({
+      method: 'delete',
+      url: `${context}/knowledge/deleteDocIndex`
+    });
   }
 
 }
