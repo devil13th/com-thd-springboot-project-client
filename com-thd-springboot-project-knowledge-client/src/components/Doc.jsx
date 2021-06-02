@@ -188,7 +188,7 @@ class Doc extends React.Component {
             <Input
               size={this.state.inputSize}
               value={this.state.formData.filePath}
-              placeholder="Description ..."
+              placeholder="File Path ..."
               onChange={(e) => {
                 this.createInputMode(e.target.value, "filePath");
               }}
