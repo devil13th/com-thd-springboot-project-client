@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Route, Link } from "react-router-dom";
 import { Layout, Menu, Breadcrumb } from "antd";
+
 import {
   DesktopOutlined,
   PieChartOutlined,
@@ -16,6 +17,10 @@ import {
 
 
 import Knowledge from '@/components/Knowledge'
+import HtmlEditor from '@/components/htmlEditor/HtmlEditor'
+
+import MarkdownEditor from '@/components/htmlEditor/MarkdownEditor'
+
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
@@ -38,8 +43,9 @@ class IndexLayout extends React.Component {
             >
               
               <Route path="/" exact component={Knowledge}></Route>
-
-            
+              <Route path="/h" exact component={HtmlEditor}></Route>
+              <Route path="/m" exact component={MarkdownEditor}></Route>
+              
               
             </div>
          
