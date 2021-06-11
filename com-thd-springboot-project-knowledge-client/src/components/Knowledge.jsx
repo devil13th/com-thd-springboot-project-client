@@ -1,5 +1,16 @@
 import React from "react";
-import {Popconfirm, Input, Menu, Row, Col, Modal, Empty, message } from "antd";
+import {
+  Popconfirm,
+  Tooltip,
+  Select,
+  Input,
+  Menu,
+  Row,
+  Col,
+  Modal,
+  Empty,
+  message,
+} from "antd";
 import {
   DeleteOutlined,
   PlusOutlined,
@@ -14,13 +25,16 @@ import {
 } from "@ant-design/icons";
 import Doc from "./Doc.jsx";
 import API from "@/api/KnowledgeApi";
+import CONSTANTS from "@/constants/Constants.js";
 const { Search } = Input;
 const { SubMenu } = Menu;
+const { Option } = Select;
 var imgUrl = require("@/assets/images/thdicon.png");
 var logoUrl = require("@/assets/images/logo.png");
 class Knowledge extends React.Component {
   state = {
     keyWord: "",
+    classify:"",
     dataList: [],
     current: "",
     docVisible: false,
@@ -31,7 +45,7 @@ class Knowledge extends React.Component {
   };
   onSearch = (keyWord) => {
     this.setState({ keyWord });
-    const searchVO = { keyWords: keyWord };
+    const searchVO = { keyWords: keyWord ,classify:this.state.classify};
     API.search(searchVO).then((r) => {
       console.log(r);
       this.setState({
@@ -57,13 +71,13 @@ class Knowledge extends React.Component {
   };
   createNewDoc = () => {
     this.setState({
-      data:{
-        classify:[],
-        content:''
+      data: {
+        classify: [],
+        content: "",
       },
       docVisible: true,
-    })
-  }
+    });
+  };
   createDocIndex = () => {
     API.createDocIndex().then(
       (r) => {
@@ -111,19 +125,38 @@ class Knowledge extends React.Component {
     const hasResult = this.state.dataList.length > 0;
 
     const search = (
-      <Search
-        prefix={
-          <img src={imgUrl.default} style={{ marginRight: 8 }} height="22" />
-        }
-        value={this.state.keyWord}
-        placeholder="input search text"
-        onSearch={this.onSearch}
-        onChange={(e) => {
-          this.setState({ keyWord: e.target.value });
-        }}
-        enterButton
-        placeholder="input search text"
-      />
+      <div>
+        <Input.Group compact>
+          <Select style={{ width: 100 }} allowClear={true} value={this.state.classify} onChange={ (v) => {this.setState({"classify":v})}}>
+            {CONSTANTS.CLASSIFY.map((item) => {
+              return (
+                <Option value={item.value}>
+                  <Tooltip title={item.name}>{item.name}</Tooltip>
+                </Option>
+              );
+            })}
+          </Select>
+
+          <Search
+            style={{ width: 350 }}
+            prefix={
+              <img
+                src={imgUrl.default}
+                style={{ marginRight: 8 }}
+                height="22"
+              />
+            }
+            value={this.state.keyWord}
+            placeholder="input search text"
+            onSearch={this.onSearch}
+            onChange={(e) => {
+              this.setState({ keyWord: e.target.value });
+            }}
+            enterButton
+            placeholder="input search text"
+          />
+        </Input.Group>
+      </div>
     );
 
     const result = this.state.dataList.map((item, index) => {
@@ -142,6 +175,8 @@ class Knowledge extends React.Component {
           <dd>
             <div>
               Description:{item.desc}
+              <br />
+              Classify:{item.classify}
               <br />
               FilePath:{item.filePath}
             </div>
@@ -164,9 +199,10 @@ class Knowledge extends React.Component {
       <div
         style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
       >
+        
         <div style={{ overflow: "auto", flex: "1 1 auto", color: "#8f8f8f" }}>
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <div style={{ flex: "0 0 300px", paddingTop: 4 }}>
+            <div style={{ flex: "0 0 500px", paddingTop: 4 }}>
               {hasResult ? <div>{search}</div> : null}
             </div>
             <div style={{ flex: "1 1 auto" }}>

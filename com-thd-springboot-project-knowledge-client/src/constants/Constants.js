@@ -17,8 +17,18 @@ const constants =  {
             color:"#2db7f5"
         },
         {
+            name:"RabbitMQ",
+            value:"RabbitMQ",
+            color:"#2db7f5"
+        },
+        {
             name:"Redis",
             value:"Redis",
+            color:"#2db7f5"
+        },
+        {
+            name:"Note",
+            value:"Note",
             color:"#f50"
         }
     ]
