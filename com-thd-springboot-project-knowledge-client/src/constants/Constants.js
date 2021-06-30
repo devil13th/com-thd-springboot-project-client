@@ -27,6 +27,11 @@ const constants =  {
             color:"#2db7f5"
         },
         {
+            name:"THD TEC",
+            value:"THD TEC",
+            color:"#f50"
+        },
+        {
             name:"Note",
             value:"Note",
             color:"#f50"

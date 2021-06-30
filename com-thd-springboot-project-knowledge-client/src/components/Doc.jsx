@@ -24,11 +24,12 @@ class Doc extends React.Component {
   state = {
     activeKey: "view",
     inputSize: "middle",
-    selectClassify: "",
+    selectTag: "",
     formData: {
       content: "",
-      classify: [],
+      classify: "",
     },
+    classifyList:[]
   };
 
   static propTypes = {
@@ -37,7 +38,7 @@ class Doc extends React.Component {
   };
   static defaultProps = {
     data: {
-      classify: [],
+      classify: "",
       content: "",
     },
     cb: () => {},
@@ -45,7 +46,11 @@ class Doc extends React.Component {
 
   componentDidMount() {
     console.log(this.props.data);
-
+    API.queryAllClassify().then(r => {
+      this.setState({
+        classifyList : r.result
+      })
+    })
     const selfData = _.cloneDeep(this.props.data);
     if (!selfData.classify) {
       selfData.classify = [];
@@ -82,22 +87,22 @@ class Doc extends React.Component {
       },
     });
   };
-  selectClassify = (selectClassify) => {
+  selectTag = (selectTag) => {
     this.setState({
-      selectClassify,
+      selectTag,
     });
   };
-  removeClassify = (value) => {
-    let classify = this.state.formData.classify.filter(
+  removeTag = (value) => {
+    let tag = this.state.formData.tag.filter(
       (item) => !(value === item)
     );
     this.setState({
-      formData: { ...this.state.formData, classify },
+      formData: { ...this.state.formData, tag },
     });
   };
-  addClassify = () => {
-    let existObj = this.state.formData.classify.find(
-      (item) => item === this.state.selectClassify
+  addTag = () => {
+    let existObj = this.state.formData.tag.find(
+      (item) => item === this.state.selectTag
     );
     if (existObj) {
       message.error("exist !");
@@ -105,9 +110,9 @@ class Doc extends React.Component {
       this.setState({
         formData: {
           ...this.state.formData,
-          classify: [
-            this.state.selectClassify,
-            ...this.state.formData.classify,
+          tag: [
+            this.state.selectTag,
+            ...this.state.formData.tag,
           ],
         },
       });
@@ -115,10 +120,10 @@ class Doc extends React.Component {
   };
   createDoc = () => {
     const data = _.cloneDeep(this.state.formData);
-    if (data.classify && data.classify.length > 0) {
-      data.classify = data.classify.join(",");
+    if (data.tag && data.tag.length > 0) {
+      data.tag = data.tag.join(",");
     } else {
-      delete data.classify;
+      delete data.tag;
     }
     API.createDoc(data).then((r) => {
       if (r.code === "0") {
@@ -200,51 +205,34 @@ class Doc extends React.Component {
 
         <dl className="form_col">
           <dd>
-            {this.state.formData.classify.map((item) => {
-              let classify = CONSTANTS.CLASSIFYMAP[item];
-              if (classify) {
-                return (
-                  <Tag key={classify.value} color={classify.color}>
-                    {classify.name}{" "}
-                    <CloseCircleOutlined
-                      onClick={() => {
-                        this.removeClassify(classify.value);
-                      }}
-                      style={{ cursor: "pointer", color: "#fff" }}
-                    />
-                  </Tag>
-                );
-              } else {
-                return (
-                  <Tag key={item}>
-                    {item}{" "}
-                    <CloseCircleOutlined
-                      onClick={() => {
-                        this.removeClassify(item);
-                      }}
-                      style={{ cursor: "pointer", color: "#fff" }}
-                    />
-                  </Tag>
-                );
-              }
-            })}
 
-            <Select
+            {/* <Select
               size="small"
-              onSelect={this.selectClassify}
-              value={this.state.selectClassify}
+              value={this.state.formData.classify}
+              onChange={(e) => {
+                this.createInputMode(e.target.value, "classify");
+              }}
               style={{ width: 120, marginRight: 8 }}
             >
               {CONSTANTS.CLASSIFY.map((item) => {
                 return <Option value={item.value}>{item.name}</Option>;
               })}
+            </Select> */}
+
+
+            <Select
+              value={this.state.formData.classify}
+              placeholder="Classify"
+              onChange={(v) => {
+                this.createInputMode(v, "classify");
+              }}
+              style={{ width: 120, marginRight: 8 }}
+            >
+              {this.state.classifyList.map((item) => {
+                return <Option value={item.value} key={item.code}>{item.name}</Option>;
+              })}
             </Select>
-            <Tooltip title="Add Tag">
-              <PlusCircleOutlined
-                onClick={this.addClassify}
-                style={{ color: "#1890ff", cursor: "pointer" }}
-              />
-            </Tooltip>
+            
           </dd>
         </dl>
 

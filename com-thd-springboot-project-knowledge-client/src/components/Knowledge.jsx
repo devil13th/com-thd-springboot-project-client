@@ -34,18 +34,27 @@ var logoUrl = require("@/assets/images/logo.png");
 class Knowledge extends React.Component {
   state = {
     keyWord: "",
-    classify:"",
+    classify: "",
     dataList: [],
     current: "",
     docVisible: false,
     data: {
       content: "",
-      classify: [],
+      classify: "",
     },
+    classifyList:[]
   };
+  componentDidMount(){
+    API.queryAllClassify().then(r => {
+      this.setState({
+        classifyList : r.result
+      })
+    })
+  }
+
   onSearch = (keyWord) => {
     this.setState({ keyWord });
-    const searchVO = { keyWords: keyWord ,classify:this.state.classify};
+    const searchVO = { keyWords: keyWord, classify: this.state.classify };
     API.search(searchVO).then((r) => {
       console.log(r);
       this.setState({
@@ -72,7 +81,7 @@ class Knowledge extends React.Component {
   createNewDoc = () => {
     this.setState({
       data: {
-        classify: [],
+        classify: "",
         content: "",
       },
       docVisible: true,
@@ -107,12 +116,35 @@ class Knowledge extends React.Component {
       message.success("SUCCESS");
     });
   };
+  reIndexThdTecFile = () => {
+    API.reIndexThdTecFile().then((r) => {
+      message.success("SUCCESS");
+    });
+  };
+
+  deleteIndexThdTecDoc = () => {
+    API.deleteIndexThdTecDoc().then((r) => {
+      message.success("SUCCESS");
+    });
+  };
+
+  initClassifyData = () => {
+    API.initClassifyData().then((r) => {
+      message.success("SUCCESS");
+    });
+  }
+
+  createClassifyIndex = () => {
+    API.createClassifyIndex().then((r) => {
+      message.success("SUCCESS");
+    });
+  }
   detail = (id) => {
     API.loadDocById(id).then((r) => {
       let rst = r.result;
-      if (rst.classify) {
-        rst.classify = rst.classify.split(",");
-      }
+      // if (rst.classify) {
+      //   rst.classify = rst.classify.split(",");
+      // }
       this.setState({
         data: rst,
         docVisible: true,
@@ -127,10 +159,18 @@ class Knowledge extends React.Component {
     const search = (
       <div>
         <Input.Group compact>
-          <Select style={{ width: 100 }} allowClear={true} value={this.state.classify} onChange={ (v) => {this.setState({"classify":v})}}>
-            {CONSTANTS.CLASSIFY.map((item) => {
+          <Select
+            style={{ width: 100 }}
+            allowClear={true}
+            placeholder={'ALL'}
+            value={this.state.classify}
+            onChange={(v) => {
+              this.setState({ classify: v });
+            }}
+          >
+            {this.state.classifyList.map((item) => {
               return (
-                <Option value={item.value}>
+                <Option value={item.code}>
                   <Tooltip title={item.name}>{item.name}</Tooltip>
                 </Option>
               );
@@ -199,7 +239,6 @@ class Knowledge extends React.Component {
       <div
         style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
       >
-        
         <div style={{ overflow: "auto", flex: "1 1 auto", color: "#8f8f8f" }}>
           <div style={{ display: "flex", flexDirection: "row" }}>
             <div style={{ flex: "0 0 500px", paddingTop: 4 }}>
@@ -227,19 +266,49 @@ class Knowledge extends React.Component {
                   icon={<SettingOutlined />}
                   title="Setting"
                 >
-                  <Menu.Item key="setting:5" icon={<PlusOutlined />}>
+                  {/* <Menu.Item key="setting:5" icon={<PlusOutlined />}>
                     Create New Doc
-                  </Menu.Item>
-                  <Menu.ItemGroup title="Index">
-                    <Menu.Item key="setting:1">Index Tec</Menu.Item>
-                    <Menu.Item key="setting:2" icon={<UndoOutlined />}>
-                      Reindex
+                  </Menu.Item> */}
+                  <Menu.ItemGroup title="THD TEC">
+                    <Menu.Item
+                      key="setting:2"
+                      icon={<UndoOutlined />}
+                      onClick={this.reIndexThdTecFile}
+                    >
+                      Reindex Thd Tec Doc
+                    </Menu.Item>
+                    <Menu.Item
+                      key="setting:indexThdTecFile"
+                      icon={<DeploymentUnitOutlined />}
+                      onClick={this.indexThdTecFile}
+                    >
+                      Index Thd Tec Doc
+                    </Menu.Item>
+
+                    <Menu.Item
+                      key="setting:deleteIndexThdTecDoc"
+                      icon={<DeleteOutlined />}
+                      onClick={this.deleteIndexThdTecDoc}
+                    >
+                      Delete Thd Tec Doc
                     </Menu.Item>
                   </Menu.ItemGroup>
                   <Menu.ItemGroup title="Management">
-                    <Menu.Item key="setting:3" icon={<TagOutlined />}>
-                      Classify
+                    <Menu.Item
+                      key="setting:createClassifyIndex"
+                      icon={<TagOutlined />}
+                      onClick={this.createClassifyIndex}
+                    >
+                      Create Classify Index
                     </Menu.Item>
+                    <Menu.Item
+                      key="setting:initClassifyData"
+                      icon={<TagOutlined />}
+                      onClick={this.initClassifyData}
+                    >
+                      Init Classify Date
+                    </Menu.Item>
+
                     <Menu.Item key="setting:4" icon={<HddOutlined />}>
                       Document
                     </Menu.Item>
@@ -262,14 +331,6 @@ class Knowledge extends React.Component {
                       >
                         <a href="#">Delete Index</a>
                       </Popconfirm>
-                    </Menu.Item>
-
-                    <Menu.Item
-                      key="setting:indexThdTecFile"
-                      icon={<DeploymentUnitOutlined />}
-                      onClick={this.indexThdTecFile}
-                    >
-                      Index Thd Tec Folder
                     </Menu.Item>
                   </Menu.ItemGroup>
                 </SubMenu>

@@ -29,6 +29,41 @@ export default {
       url: `${context}/knowledge/indexThdTecFile`
     });
   },
+
+  createClassifyIndex:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/createClassifyIndex`
+    });
+  },
+  initClassifyData:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/initClassifyData`
+    });
+  },
+
+  queryAllClassify:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/queryAllClassify`
+    });
+  },
+
+  
+
+  reIndexThdTecFile:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/reIndexThdTecFile`
+    });
+  },
+  deleteIndexThdTecDoc:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/deleteIndexThdTecDoc`
+    });
+  },
   loadDocById:function(id){
     return axios({
       method: 'get',
