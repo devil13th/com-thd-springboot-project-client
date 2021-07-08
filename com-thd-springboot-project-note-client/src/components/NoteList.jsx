@@ -115,6 +115,9 @@ class NoteList extends React.Component {
 
     // note view modal visible
     viewModalVisible: false,
+
+    // 期限，用于新增时候的默认值
+    expireDate : moment()
   };
 
   calendarComponent = React.createRef();
@@ -484,6 +487,13 @@ class NoteList extends React.Component {
       });
     }
   };
+  // create note with expire date
+  openNoteFormModalWithExpireDate = (expireDate) => {
+      this.setState({
+        expireDate,
+        formModalVisible: true,
+      });
+  };
   // 打开 视图 modal
   openNoteViewModal = (noteId) => {
     this.setState({
@@ -745,6 +755,7 @@ class NoteList extends React.Component {
         <NoteCalendar
           ref={this.calendarComponent}
           cb={this.openNoteFormModal}
+          createCb={this.openNoteFormModalWithExpireDate}
           queryCondition={this.state.queryCondition}
         ></NoteCalendar>
       </div>
@@ -1281,6 +1292,7 @@ class NoteList extends React.Component {
             canEdit={true}
             closeFn={this.closeNoteFormModal}
             cb={this.queryTabData}
+            expireDate={this.state.expireDate}
           ></NoteForm>
         </Modal>
 

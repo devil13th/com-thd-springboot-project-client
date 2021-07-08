@@ -1,5 +1,5 @@
 import React from 'react'
-import { message,Button,Calendar,Spin, Badge,Tooltip,Rate,DatePicker } from 'antd';
+import { message,Button,Calendar,Spin, Badge,Tooltip,Rate,DatePicker, Modal,Divider } from 'antd';
 import NoteApi from "@/api/NoteApi";
 
 
@@ -7,6 +7,9 @@ import PropTypes from "prop-types";
 import _ from 'lodash'
 import moment  from 'moment'
 import {BookOutlined,
+  PlusOutlined,
+  PlusCircleOutlined,
+  UnorderedListOutlined,
   ClockCircleOutlined,
   CheckOutlined,
   ExclamationOutlined,
@@ -18,7 +21,10 @@ class NoteCalendar extends React.Component {
     data:[],
     value: moment(),
     selectedValue: moment(),
-    queryCondition:{}
+    queryCondition:{},
+    viewList:[],
+    viewListModalVisible:false,
+    modalTitleDate:''
   }
 
   // static propTypes = {
@@ -166,6 +172,15 @@ class NoteCalendar extends React.Component {
   }
 
 
+  openViewList = (value) => {
+    const dayNoteList = this.getListData(value);
+    this.setState({
+      viewList:dayNoteList,
+      viewListModalVisible:true,
+      modalTitleDate:value.format('YYYY-MM-DD')
+    })
+  }
+
   // 获取每天格子中的的数据
   getListData = (value) => {
     //console.log(value)
@@ -179,20 +194,46 @@ class NoteCalendar extends React.Component {
     return listData || [];
   }
 
+
+
   // 每天格子中的的数据列表渲染
   dateCellRender = (value) => {
     // console.log("calendar dateCellRender ...")
     const listData = this.getListData(value);
-    
-    return (
-      <ul className="events" style={{listStyleType:'none',paddingLeft:4}}>
-        {listData.map(item => (
-          <li key={item.title} onClick={()=>{this.props.cb(item.noteId)}}>
-            <Badge color={this.computColor(item)} text={this.computContent(item)} />
-          </li>
-        ))}
-      </ul>
-    );
+    if(listData && listData.length > 0){
+      return (
+        <div style={{display:'flex'}}>
+          <div style={{flex:'0 0 30px'}}>
+          <span style={{color:'#1890ff'}} onClick={() => {this.props.createCb(value)}}> 
+          <Tooltip title="Create">
+            <PlusCircleOutlined /> 
+            </Tooltip>
+          </span>
+          <br/>
+          <span style={{color:'#1890ff'}} onClick={() => {this.openViewList(value)}}> 
+            <Tooltip title="List">
+              <UnorderedListOutlined />
+            </Tooltip>
+          </span>
+          </div>
+          
+          <ul className="events" style={{flex:'1 1 auto',listStyleType:'none',paddingLeft:4}}>
+            {listData.map(item => (
+              <li key={item.title} onClick={()=>{this.props.cb(item.noteId)}}>
+                <Badge color={this.computColor(item)} text={this.computContent(item)} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }else{
+      return (
+        <div style={{textAlign:'center',paddingTop:16,color:'rgba(18,90,255,0.2)'}} onClick={() => {this.props.createCb(value)}}> 
+            <PlusCircleOutlined  style={{fontSize:30}}/> <br/>
+            Create
+        </div>
+      )
+    }
   }
 
 
@@ -240,10 +281,18 @@ class NoteCalendar extends React.Component {
 
   }
 
-  dataChange = () => {
-    alert(2)
+  dataChange = (momt) => {
+    console.log(momt)
+  }
+
+  selectCb = () => {
+
+  }
+
+  closeViewListModal = () => {
     this.setState({
-      selectedValue:moment('2021-01-01','YYYY-MM-DD')
+      viewList:[],
+      viewListModalVisible:false
     })
   }
 
@@ -280,7 +329,29 @@ class NoteCalendar extends React.Component {
             onPanelChange={this.onPanelChange}
             onSelect={this.onSelect}
           />
-          </Spin>
+        </Spin>
+
+
+          <Modal
+            title={`${this.state.modalTitleDate}`}
+            visible={this.state.viewListModalVisible}
+            footer={null}
+            width={"60%"}
+            style={{ top: 24 }}
+            destroyOnClose={true}
+            onCancel={this.closeViewListModal}
+            maskClosable={false}
+          >
+             
+          <ul className="events" style={{flex:'1 1 auto',listStyleType:'none',paddingLeft:4}}>
+            {this.state.viewList.map(item => (
+              <li key={item.title} onClick={()=>{this.props.cb(item.noteId)}}>
+                <Badge color={this.computColor(item)} text={this.computContent(item)} />
+              </li>
+            ))}
+          </ul>
+       
+        </Modal>
       </div>
     )
   }

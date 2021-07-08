@@ -64,6 +64,7 @@ class NoteForm extends React.Component {
     canEdit: PropTypes.bool,
     closeFn: PropTypes.func,
     cb: PropTypes.func,
+    expireDate:PropTypes.object
   };
 
   //指定默认标签属性值
@@ -71,6 +72,7 @@ class NoteForm extends React.Component {
     noteId: "", //sex默认值为男
     canEdit: true, //age默认值为18
     closeFn: () => { },
+    expireDate: moment().add(2, "days")
   };
   componentDidMount() {
     this.pageInit();
@@ -245,9 +247,12 @@ class NoteForm extends React.Component {
     } else {
       // create a new note , init default data
       const mmt = moment();
+
+      const expireDate = this.props.expireDate;
+
       let formData = {
         ...this.state.formData,
-        expireDate: moment().add(2, "days"),
+        expireDate,
         alarmDays: 1,
       };
 
