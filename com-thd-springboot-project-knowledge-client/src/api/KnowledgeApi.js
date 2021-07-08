@@ -29,6 +29,12 @@ export default {
       url: `${context}/knowledge/indexThdTecFile`
     });
   },
+  createClassifyIndex:function(){
+    return axios({
+      method: 'get',
+      url: `${context}/knowledge/createClassifyIndex`
+    });
+  },
   createClassify:function(classify){
     return axios({
       method: 'get',
@@ -41,6 +47,7 @@ export default {
       url: `${context}/knowledge/initClassifyData`
     });
   },
+  
   createClassifyData:function(classify){
     return axios({
       method: 'post',
@@ -76,6 +83,13 @@ export default {
       method: 'delete',
       url: `${context}/knowledge/deleteDocIndex`
     });
-  }
+  },
+  deleteClassifyIndex:function(){
+    return axios({
+      method: 'delete',
+      url: `${context}/knowledge/deleteClassifyIndex`
+    });
+  },
+  
 
 }

@@ -14,6 +14,8 @@ import {
 } from "antd";
 import {
   DeleteOutlined,
+  FileAddOutlined,
+  ArrowRightOutlined,
   PlusOutlined,
   UploadOutlined,
   EditOutlined,
@@ -121,6 +123,24 @@ class Knowledge extends React.Component {
       }
     );
   };
+
+  deleteClassifyIndex = () => {
+    API.deleteClassifyIndex().then(
+      (r) => {
+        console.log(r);
+        message.success("Index Be Deleted Success");
+      },
+      (err) => {
+        message.error(err.message);
+      }
+    );
+  };
+
+
+
+  
+
+
   indexThdTecFile = () => {
     API.indexThdTecFile().then((r) => {
       message.success("SUCCESS");
@@ -314,7 +334,7 @@ class Knowledge extends React.Component {
                   {/* <Menu.Item key="setting:5" icon={<PlusOutlined />}>
                     Create New Doc
                   </Menu.Item> */}
-                  <Menu.ItemGroup title="THD TEC">
+                  <Menu.ItemGroup title={ <div><HddOutlined /> THD TEC</div>}>
                     <Menu.Item
                       key="setting:2"
                       icon={<UndoOutlined />}
@@ -338,32 +358,49 @@ class Knowledge extends React.Component {
                       Delete Thd Tec Doc
                     </Menu.Item>
                   </Menu.ItemGroup>
-                  <Menu.ItemGroup title="Management">
+                  <Menu.ItemGroup title={ <div><HddOutlined /> Classify Management</div>}>
                     <Menu.Item
                       key="setting:createClassifyIndex"
-                      icon={<TagOutlined />}
+                      icon={<DeploymentUnitOutlined/>}
                       onClick={this.createClassifyIndex}
                     >
                       Create Classify Index
                     </Menu.Item>
                     <Menu.Item
                       key="setting:initClassifyData"
-                      icon={<TagOutlined />}
+                      icon={<UndoOutlined />}
                       onClick={this.initClassifyData}
                     >
                       Init Classify Date
                     </Menu.Item>
 
+
+                    <Menu.Item
+                      key="setting:deleteClassifyIndex"
+                      icon={<DeleteOutlined />}
+                    >
+                      <Popconfirm
+                        title="Are you sure to delete index ?"
+                        onConfirm={this.deleteClassifyIndex}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <a href="#">Delete Classify Index</a>
+                      </Popconfirm>
+                      
+                    </Menu.Item>
+
+
                     <Menu.Item
                       key="setting:createClassify"
-                      icon={<TagOutlined />}
+                      icon={<FileAddOutlined />}
                       onClick={this.openCreateClassifyModal}
                     >
                       Create Classify
                     </Menu.Item>
-
+                  </Menu.ItemGroup>
                     
-
+                  <Menu.ItemGroup title={ <div><HddOutlined />Management</div>}>
 
                     <Menu.Item key="setting:4" icon={<HddOutlined />}>
                       Document
