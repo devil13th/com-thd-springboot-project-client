@@ -29,11 +29,10 @@ export default {
       url: `${context}/knowledge/indexThdTecFile`
     });
   },
-
-  createClassifyIndex:function(){
+  createClassify:function(classify){
     return axios({
       method: 'get',
-      url: `${context}/knowledge/createClassifyIndex`
+      url: `${context}/knowledge/createClassify/${classify}`
     });
   },
   initClassifyData:function(){
@@ -42,16 +41,18 @@ export default {
       url: `${context}/knowledge/initClassifyData`
     });
   },
-
+  createClassifyData:function(classify){
+    return axios({
+      method: 'post',
+      url: `${context}/knowledge/createClassifyData/${classify}`
+    });
+  },
   queryAllClassify:function(){
     return axios({
       method: 'get',
       url: `${context}/knowledge/queryAllClassify`
     });
   },
-
-  
-
   reIndexThdTecFile:function(){
     return axios({
       method: 'get',

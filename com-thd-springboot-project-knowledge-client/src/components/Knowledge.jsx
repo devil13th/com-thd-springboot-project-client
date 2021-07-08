@@ -10,6 +10,7 @@ import {
   Modal,
   Empty,
   message,
+  Slider
 } from "antd";
 import {
   DeleteOutlined,
@@ -33,6 +34,7 @@ var imgUrl = require("@/assets/images/thdicon.png");
 var logoUrl = require("@/assets/images/logo.png");
 class Knowledge extends React.Component {
   state = {
+    
     keyWord: "",
     classify: "",
     dataList: [],
@@ -42,7 +44,10 @@ class Knowledge extends React.Component {
       content: "",
       classify: "",
     },
-    classifyList:[]
+    classifyList:[],
+    createClassifyModalVisible:false,
+    classifyName: '',
+    pageSize:10
   };
   componentDidMount(){
     API.queryAllClassify().then(r => {
@@ -54,7 +59,7 @@ class Knowledge extends React.Component {
 
   onSearch = (keyWord) => {
     this.setState({ keyWord });
-    const searchVO = { keyWords: keyWord, classify: this.state.classify };
+    const searchVO = { keyWords: keyWord, classify: this.state.classify,page:1,pageSize:this.state.pageSize };
     API.search(searchVO).then((r) => {
       console.log(r);
       this.setState({
@@ -151,6 +156,40 @@ class Knowledge extends React.Component {
       });
     });
   };
+
+  openCreateClassifyModal = () => {
+    this.setState({
+      createClassifyModalVisible:true
+    })
+  }
+
+  closeCreateClassifyModal = () => {
+    this.setState({
+      createClassifyModalVisible:false
+    })
+  }
+
+  createClassify = () =>{
+    API.createClassify(this.state.classifyName).then(r => {
+      console.log(r);
+    })
+  }
+
+  setClassifyName = (e) =>{
+    this.setState({
+      classifyName:e.target.value
+    })
+  }
+
+  setPage = (v) => {
+    this.setState({
+      pageSize:v
+    })
+  }
+
+  sliderFormatter = (v) => {
+    return `查询数量：${v} 条`
+  }
   render() {
     console.log("================", imgUrl);
 
@@ -196,6 +235,7 @@ class Knowledge extends React.Component {
             placeholder="input search text"
           />
         </Input.Group>
+        <Slider tipFormatter={ this.sliderFormatter } max={100} min={0} step={5} value={this.state.pageSize} onChange={this.setPage}/>
       </div>
     );
 
@@ -309,6 +349,17 @@ class Knowledge extends React.Component {
                       Init Classify Date
                     </Menu.Item>
 
+                    <Menu.Item
+                      key="setting:createClassify"
+                      icon={<TagOutlined />}
+                      onClick={this.openCreateClassifyModal}
+                    >
+                      Create Classify
+                    </Menu.Item>
+
+                    
+
+
                     <Menu.Item key="setting:4" icon={<HddOutlined />}>
                       Document
                     </Menu.Item>
@@ -369,6 +420,23 @@ class Knowledge extends React.Component {
         >
           <Doc data={this.state.data} cb={this.closeDocVisible}></Doc>
         </Modal>
+
+
+        <Modal
+          title="Create Classify"
+          visible={this.state.createClassifyModalVisible}
+          width={500}
+          style={{ top: 24 }}
+          destroyOnClose={true}
+          onCancel={this.closeCreateClassifyModal}
+          onOk={this.createClassify}
+          maskClosable={false}
+          okText={`Create`}
+        >   
+          Classify : <Input value={this.state.classifyName} onChange={this.setClassifyName}/>
+
+
+        </Modal>   
       </div>
     );
   }

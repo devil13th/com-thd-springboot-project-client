@@ -29,7 +29,7 @@ class Doc extends React.Component {
       content: "",
       classify: "",
     },
-    classifyList:[]
+    classifyList: []
   };
 
   static propTypes = {
@@ -41,14 +41,14 @@ class Doc extends React.Component {
       classify: "",
       content: "",
     },
-    cb: () => {},
+    cb: () => { },
   };
 
   componentDidMount() {
     console.log(this.props.data);
     API.queryAllClassify().then(r => {
       this.setState({
-        classifyList : r.result
+        classifyList: r.result
       })
     })
     const selfData = _.cloneDeep(this.props.data);
@@ -148,8 +148,41 @@ class Doc extends React.Component {
             </Radio.Group>
           </dd>
         </dl> */}
+
         <dl className="form_col">
           <dd>
+
+            {/* <Select
+              size="small"
+              value={this.state.formData.classify}
+              onChange={(e) => {
+                this.createInputMode(e.target.value, "classify");
+              }}
+              style={{ width: 120, marginRight: 8 }}
+            >
+              {CONSTANTS.CLASSIFY.map((item) => {
+                return <Option value={item.value}>{item.name}</Option>;
+              })}
+            </Select> */}
+          </dd>
+        </dl>
+
+
+        <dl className="form_col">
+          <dd style={{ display: 'flex' }}>
+            <Select
+              value={this.state.formData.classify}
+              placeholder="Classify"
+              onChange={(v) => {
+                this.createInputMode(v, "classify");
+              }}
+              style={{ width: 150, marginRight: 8 }}
+            >
+              {this.state.classifyList.map((item) => {
+                return <Option value={item.value} key={item.code}>{item.name}</Option>;
+              })}
+            </Select>
+
             <Input
               size={this.state.inputSize}
               value={this.state.formData.title}
@@ -163,6 +196,7 @@ class Doc extends React.Component {
 
         <dl className="form_col">
           <dd>
+
             <Input
               size={this.state.inputSize}
               value={this.state.formData.desc}
@@ -188,53 +222,22 @@ class Doc extends React.Component {
             />
           </TabPane>
           <TabPane tab="Detail" key="detail">
-          <dl className="form_col">
-          <dd>
-            <Input
-              size={this.state.inputSize}
-              value={this.state.formData.filePath}
-              placeholder="File Path ..."
-              onChange={(e) => {
-                this.createInputMode(e.target.value, "filePath");
-              }}
-            />
-          </dd>
-        </dl>
+            <dl className="form_col">
+              <dd>
+                <Input
+                  size={this.state.inputSize}
+                  value={this.state.formData.filePath}
+                  placeholder="File Path ..."
+                  onChange={(e) => {
+                    this.createInputMode(e.target.value, "filePath");
+                  }}
+                />
+              </dd>
+            </dl>
           </TabPane>
         </Tabs>
 
-        <dl className="form_col">
-          <dd>
 
-            {/* <Select
-              size="small"
-              value={this.state.formData.classify}
-              onChange={(e) => {
-                this.createInputMode(e.target.value, "classify");
-              }}
-              style={{ width: 120, marginRight: 8 }}
-            >
-              {CONSTANTS.CLASSIFY.map((item) => {
-                return <Option value={item.value}>{item.name}</Option>;
-              })}
-            </Select> */}
-
-
-            <Select
-              value={this.state.formData.classify}
-              placeholder="Classify"
-              onChange={(v) => {
-                this.createInputMode(v, "classify");
-              }}
-              style={{ width: 120, marginRight: 8 }}
-            >
-              {this.state.classifyList.map((item) => {
-                return <Option value={item.value} key={item.code}>{item.name}</Option>;
-              })}
-            </Select>
-            
-          </dd>
-        </dl>
 
         <Divider></Divider>
         <div style={{ textAlign: "right" }}>
