@@ -59,7 +59,12 @@ class Knowledge extends React.Component {
 
   onSearch = (keyWord) => {
     this.setState({ keyWord });
-    const searchVO = { keyWords: keyWord, classify: this.state.classify,page:1,pageSize:this.state.pageSize };
+    const searchVO = {
+      keyWords: keyWord,
+      classify: this.state.classify,
+      page: 0,
+      pageSize: this.state.pageSize
+    };
     API.search(searchVO).then((r) => {
       console.log(r);
       this.setState({
