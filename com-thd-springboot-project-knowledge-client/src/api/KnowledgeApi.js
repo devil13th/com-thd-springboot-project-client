@@ -23,12 +23,12 @@ export default {
     });
     
   },
-  indexThdTecFile:function(){
-    return axios({
-      method: 'get',
-      url: `${context}/knowledge/indexThdTecFile`
-    });
-  },
+  // indexThdTecFile:function(){
+  //   return axios({
+  //     method: 'get',
+  //     url: `${context}/knowledge/indexThdTecFile`
+  //   });
+  // },
   createClassifyIndex:function(){
     return axios({
       method: 'get',
@@ -60,10 +60,11 @@ export default {
       url: `${context}/knowledge/queryAllClassify`
     });
   },
-  reIndexThdTecFile:function(){
+  reIndexFolderByClassify:function(vo){
     return axios({
-      method: 'get',
-      url: `${context}/knowledge/reIndexThdTecFile`
+      method: 'post',
+      url: `${context}/knowledge/reIndexFolderByClassify`,
+      data:vo
     });
   },
   deleteIndexThdTecDoc:function(){
@@ -82,6 +83,12 @@ export default {
     return axios({
       method: 'delete',
       url: `${context}/knowledge/deleteDocIndex`
+    });
+  },
+  deleteDocByClassify:function(classify){
+    return axios({
+      method: 'delete',
+      url: `${context}/knowledge/deleteDocByClassify/${classify}`
     });
   },
   deleteClassifyIndex:function(){
