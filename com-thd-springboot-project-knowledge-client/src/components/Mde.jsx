@@ -1,17 +1,17 @@
-import React from "react";
-import ReactMde from "react-mde";
-import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
-import ReactMarkdown from "react-markdown";
+import React from 'react';
+import ReactMde from 'react-mde';
+import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+import ReactMarkdown from 'react-markdown';
 
-import "react-mde/lib/styles/css/react-mde-all.css";
+import 'react-mde/lib/styles/css/react-mde-all.css';
 
 class Mde extends React.Component {
   state = {
     markdown: `aaaaa`,
     id: `editor_${Math.random()}`,
-    value: "",
-    selectedTab:'write'
+    value: '',
+    selectedTab: 'write',
   };
 
   static propTypes = {
@@ -21,15 +21,15 @@ class Mde extends React.Component {
 
   setValue = (value) => {
     this.setState({
-      value
-    })
-  }
+      value,
+    });
+  };
 
   setSelectedTab = (selectedTab) => {
     this.setState({
-      selectedTab
-    })
-  }
+      selectedTab,
+    });
+  };
 
   handleChange = (value) => {
     this.setState({
@@ -55,7 +55,6 @@ class Mde extends React.Component {
               tabIndex: -1,
             },
           }}
-         
         />
       </div>
     );

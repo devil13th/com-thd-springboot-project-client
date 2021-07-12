@@ -1,8 +1,8 @@
-import React from "react";
-import { Input, Select, Switch, Button, Space, Divider, message } from "antd";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import API from "@/api/KnowledgeApi";
-import PropTypes from "prop-types";
+import React from 'react';
+import { Input, Select, Switch, Button, Space, Divider, message } from 'antd';
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import API from '@/api/KnowledgeApi';
+import PropTypes from 'prop-types';
 const { Option } = Select;
 class IndexForm extends React.Component {
   static propTypes = {
@@ -16,9 +16,9 @@ class IndexForm extends React.Component {
 
   state = {
     indexInfo: {
-      path: "",
-      classify: "",
-      suffix: ".md",
+      path: '',
+      classify: '',
+      suffix: '.md',
       reIndex: false,
     },
     classifyList: [],
@@ -43,8 +43,8 @@ class IndexForm extends React.Component {
 
   reIndexFolderByClassify = () => {
     API.reIndexFolderByClassify(this.state.indexInfo).then((r) => {
-      if (r.code === "0") {
-        message.success("Index Folder Success");
+      if (r.code === '0') {
+        message.success('Index Folder Success');
         this.props.okFn();
       } else {
         message.error(r.msg);
@@ -57,23 +57,23 @@ class IndexForm extends React.Component {
       <div>
         <dl className="form_col">
           <dt>Folder Path : eg. D:\devil13th\thd\resource\tec </dt>
-          <dd style={{ display: "flex" }}>
+          <dd style={{ display: 'flex' }}>
             <Input
               value={this.state.indexInfo.path}
               onChange={(e) => {
-                this.createInputMode(e.target.value, "path");
+                this.createInputMode(e.target.value, 'path');
               }}
             />
           </dd>
         </dl>
         <dl className="form_col">
           <dt>Classify : </dt>
-          <dd style={{ display: "flex" }}>
+          <dd style={{ display: 'flex' }}>
             <Select
               value={this.state.indexInfo.classify}
               placeholder="Classify"
               onChange={(v) => {
-                this.createInputMode(v, "classify");
+                this.createInputMode(v, 'classify');
               }}
               style={{ width: 150, marginRight: 8 }}
             >
@@ -90,11 +90,11 @@ class IndexForm extends React.Component {
 
         <dl className="form_col">
           <dt>Suffix : eg. .md,.html,.txt </dt>
-          <dd style={{ display: "flex" }}>
+          <dd style={{ display: 'flex' }}>
             <Input
               value={this.state.indexInfo.suffix}
               onChange={(e) => {
-                this.createInputMode(e.target.value, "suffix");
+                this.createInputMode(e.target.value, 'suffix');
               }}
             />
           </dd>
@@ -102,12 +102,12 @@ class IndexForm extends React.Component {
 
         <dl className="form_col">
           <dt>ReIndex：</dt>
-          <dd style={{ display: "flex" }}>
+          <dd style={{ display: 'flex' }}>
             <Switch
               checkedChildren={<CheckOutlined />}
               unCheckedChildren={<CloseOutlined />}
               onChange={(checked) => {
-                this.createInputMode(checked, "reIndex");
+                this.createInputMode(checked, 'reIndex');
               }}
               defaultChecked={this.state.indexInfo.reIndex}
             />
@@ -115,7 +115,7 @@ class IndexForm extends React.Component {
         </dl>
 
         <Divider></Divider>
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: 'right' }}>
           <Space>
             <Button type="primary" onClick={this.reIndexFolderByClassify}>
               Index Folder

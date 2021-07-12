@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Popconfirm,
   Tooltip,
@@ -12,7 +12,7 @@ import {
   message,
   Slider,
   Button,
-} from "antd";
+} from 'antd';
 import {
   DeleteOutlined,
   FileAddOutlined,
@@ -26,35 +26,35 @@ import {
   AppstoreOutlined,
   TagOutlined,
   SettingOutlined,
-} from "@ant-design/icons";
-import Doc from "./Doc.jsx";
-import IndexForm from "./IndexForm";
-import API from "@/api/KnowledgeApi";
-import CONSTANTS from "@/constants/Constants.js";
+} from '@ant-design/icons';
+import Doc from './Doc.jsx';
+import IndexForm from './IndexForm';
+import API from '@/api/KnowledgeApi';
+import CONSTANTS from '@/constants/Constants.js';
 
 const { Search } = Input;
 const { SubMenu } = Menu;
 const { Option } = Select;
-var imgUrl = require("@/assets/images/thdicon.png");
-var logoUrl = require("@/assets/images/logo.png");
+var imgUrl = require('@/assets/images/thdicon.png');
+var logoUrl = require('@/assets/images/logo.png');
 class Knowledge extends React.Component {
   state = {
-    keyWord: "",
-    classify: "",
+    keyWord: '',
+    classify: '',
     dataList: [],
-    current: "",
+    current: '',
     docVisible: false,
     data: {
-      content: "",
-      classify: "",
+      content: '',
+      classify: '',
     },
     classifyList: [],
     createClassifyModalVisible: false,
-    classifyName: "",
+    classifyName: '',
     pageSize: 10,
     indexFolerModalVisible: false,
     deleteDataOfClassifyModalVisible: false,
-    deleteClassify: "",
+    deleteClassify: '',
   };
   componentDidMount() {
     API.queryAllClassify().then((r) => {
@@ -81,7 +81,7 @@ class Knowledge extends React.Component {
   };
 
   handleClick = (e) => {
-    console.log("click ", e);
+    console.log('click ', e);
     this.setState({ current: e.key });
   };
 
@@ -98,8 +98,8 @@ class Knowledge extends React.Component {
   createNewDoc = () => {
     this.setState({
       data: {
-        classify: "",
-        content: "",
+        classify: '',
+        content: '',
       },
       docVisible: true,
     });
@@ -108,7 +108,7 @@ class Knowledge extends React.Component {
     API.createDocIndex().then(
       (r) => {
         console.log(r);
-        message.success("Index Be Created Success");
+        message.success('Index Be Created Success');
       },
       (err) => {
         debugger;
@@ -121,7 +121,7 @@ class Knowledge extends React.Component {
     API.deleteDocIndex().then(
       (r) => {
         console.log(r);
-        message.success("Index Be Deleted Success");
+        message.success('Index Be Deleted Success');
       },
       (err) => {
         message.error(err.message);
@@ -133,43 +133,43 @@ class Knowledge extends React.Component {
     if (this.state.deleteClassify) {
       API.deleteDocByClassify(this.state.deleteClassify).then(
         (r) => {
-          message.success("Index Be Deleted Success");
+          message.success('Index Be Deleted Success');
         },
         (err) => {
           message.error(err.message);
         }
       );
     } else {
-      message.error("Please Select A Classify");
+      message.error('Please Select A Classify');
     }
   };
 
   indexThdTecFile = () => {
     API.indexThdTecFile().then((r) => {
-      message.success("SUCCESS");
+      message.success('SUCCESS');
     });
   };
   reIndexThdTecFile = () => {
     API.reIndexThdTecFile().then((r) => {
-      message.success("SUCCESS");
+      message.success('SUCCESS');
     });
   };
 
   deleteIndexThdTecDoc = () => {
     API.deleteIndexThdTecDoc().then((r) => {
-      message.success("SUCCESS");
+      message.success('SUCCESS');
     });
   };
 
   initClassifyData = () => {
     API.initClassifyData().then((r) => {
-      message.success("SUCCESS");
+      message.success('SUCCESS');
     });
   };
 
   createClassifyIndex = () => {
     API.createClassifyIndex().then((r) => {
-      message.success("SUCCESS");
+      message.success('SUCCESS');
     });
   };
   detail = (id) => {
@@ -211,7 +211,7 @@ class Knowledge extends React.Component {
 
   createClassify = () => {
     API.createClassify(this.state.classifyName).then((r) => {
-      message.success("Create Classify SUCCESS");
+      message.success('Create Classify SUCCESS');
       this.closeCreateClassifyModal();
     });
   };
@@ -245,7 +245,7 @@ class Knowledge extends React.Component {
   };
 
   render() {
-    console.log("================", imgUrl);
+    console.log('================', imgUrl);
 
     const hasResult = this.state.dataList.length > 0;
 
@@ -255,7 +255,7 @@ class Knowledge extends React.Component {
           <Select
             style={{ width: 150 }}
             allowClear={true}
-            placeholder={"ALL"}
+            placeholder={'ALL'}
             value={this.state.classify}
             onChange={(v) => {
               this.setState({ classify: v });
@@ -305,7 +305,11 @@ class Knowledge extends React.Component {
         <dl key={index}>
           <dt>
             <span
-              style={{ color: "#108ee9", fontSize: 18, cursor: "pointer" }}
+              style={{
+                color: '#108ee9',
+                fontSize: 18,
+                cursor: 'pointer',
+              }}
               onClick={() => {
                 this.detail(item.id);
               }}
@@ -338,19 +342,23 @@ class Knowledge extends React.Component {
     const emptyData = <Empty style={{ marginTop: 32 }} />;
     return (
       <div
-        style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
+        style={{
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
-        <div style={{ overflow: "auto", flex: "1 1 auto", color: "#8f8f8f" }}>
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <div style={{ flex: "0 0 500px", paddingTop: 4 }}>
+        <div style={{ overflow: 'auto', flex: '1 1 auto', color: '#8f8f8f' }}>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div style={{ flex: '0 0 500px', paddingTop: 4 }}>
               {hasResult ? <div>{search}</div> : null}
             </div>
-            <div style={{ flex: "1 1 auto" }}>
+            <div style={{ flex: '1 1 auto' }}>
               <Menu
                 onClick={this.handleClick}
                 selectedKeys={[this.state.current]}
                 mode="horizontal"
-                style={{ textAlign: "right", borderBottom: "0px" }}
+                style={{ textAlign: 'right', borderBottom: '0px' }}
               >
                 {/* <Menu.Item key="mail" icon={<UploadOutlined />}>
                   Upload Doc
@@ -373,7 +381,7 @@ class Knowledge extends React.Component {
                   <Menu.ItemGroup
                     title={
                       <div>
-                        <HddOutlined /> Index Folder{" "}
+                        <HddOutlined /> Index Folder{' '}
                       </div>
                     }
                   >
@@ -413,14 +421,14 @@ class Knowledge extends React.Component {
                   >
                     <Menu.Item
                       key="setting:createClassifyIndex"
-                      icon={<DeploymentUnitOutlined style={{ color: "red" }} />}
+                      icon={<DeploymentUnitOutlined style={{ color: 'red' }} />}
                       onClick={this.createClassifyIndex}
                     >
                       Create Classify Index
                     </Menu.Item>
                     <Menu.Item
                       key="setting:initClassifyData"
-                      icon={<UndoOutlined style={{ color: "red" }} />}
+                      icon={<UndoOutlined style={{ color: 'red' }} />}
                     >
                       <Popconfirm
                         title="Are you sure to initalize classify dic data ?"
@@ -434,7 +442,7 @@ class Knowledge extends React.Component {
 
                     <Menu.Item
                       key="setting:deleteClassifyIndex"
-                      icon={<DeleteOutlined style={{ color: "red" }} />}
+                      icon={<DeleteOutlined style={{ color: 'red' }} />}
                     >
                       Delete Classify Index
                     </Menu.Item>
@@ -460,14 +468,14 @@ class Knowledge extends React.Component {
                     </Menu.Item> */}
                     <Menu.Item
                       key="setting:createDocIndex"
-                      icon={<DeploymentUnitOutlined style={{ color: "red" }} />}
+                      icon={<DeploymentUnitOutlined style={{ color: 'red' }} />}
                       onClick={this.createDocIndex}
                     >
                       Create Index
                     </Menu.Item>
                     <Menu.Item
                       key="setting:deleteDocIndex"
-                      icon={<DeleteOutlined style={{ color: "red" }} />}
+                      icon={<DeleteOutlined style={{ color: 'red' }} />}
                     >
                       <Popconfirm
                         title="Are you sure to delete index ?"
@@ -486,26 +494,26 @@ class Knowledge extends React.Component {
 
           {/* 首页搜索 */}
           {!hasResult ? (
-            <div style={{ marginTop: 100, width: 500, margin: "0px auto" }}>
+            <div style={{ marginTop: 100, width: 500, margin: '0px auto' }}>
               <img src={logoUrl.default} height="30" />
               {search}
             </div>
           ) : null}
-          <div style={{ marginTop: 100, margin: "0px 100px" }}>
+          <div style={{ marginTop: 100, margin: '0px 100px' }}>
             {hasResult ? result : emptyData}
           </div>
         </div>
 
         {/* footer */}
-        <div style={{ flex: "0 0 40", textAlign: "center", color: "#8f8f8f" }}>
-          {" "}
-          Thd ElasticSearch{" "}
+        <div style={{ flex: '0 0 40', textAlign: 'center', color: '#8f8f8f' }}>
+          {' '}
+          Thd ElasticSearch{' '}
         </div>
 
         <Modal
           title="Create Document"
           visible={this.state.docVisible}
-          width={"80%"}
+          width={'80%'}
           style={{ top: 24 }}
           destroyOnClose={true}
           footer={null}
@@ -527,7 +535,7 @@ class Knowledge extends React.Component {
           maskClosable={false}
           okText={`Create`}
         >
-          Classify :{" "}
+          Classify :{' '}
           <Input
             value={this.state.classifyName}
             onChange={this.setClassifyName}
@@ -552,7 +560,7 @@ class Knowledge extends React.Component {
           <Select
             style={{ width: 250 }}
             allowClear={true}
-            placeholder={"Please Select A Classify"}
+            placeholder={'Please Select A Classify'}
             value={this.state.deleteClassify}
             onChange={(v) => {
               this.setState({ deleteClassify: v });
@@ -583,7 +591,7 @@ class Knowledge extends React.Component {
             okFn={this.closeIndexFolderModal}
             cancelFn={this.closeIndexFolderModal}
           >
-            {" "}
+            {' '}
           </IndexForm>
         </Modal>
       </div>

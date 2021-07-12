@@ -16,5 +16,6 @@
     "*.js": "javascript",
     "*.jsx": "javascriptreact",
     "*.json": "json"
-  }
+  },
+  "prettier.singleQuote": true
 }

@@ -1,6 +1,6 @@
-import React from "react";
-import MdEditor from "./MdEditor.jsx";
-import MarkdownPreview from "@uiw/react-markdown-preview";
+import React from 'react';
+import MdEditor from './MdEditor.jsx';
+import MarkdownPreview from '@uiw/react-markdown-preview';
 import {
   Divider,
   Tabs,
@@ -11,23 +11,23 @@ import {
   Select,
   Tag,
   message,
-} from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import PropTypes from "prop-types";
-import { PlusCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import CONSTANTS from "@/constants/Constants.js";
-import API from "@/api/KnowledgeApi";
-import _ from "lodash";
+} from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropTypes from 'prop-types';
+import { PlusCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import CONSTANTS from '@/constants/Constants.js';
+import API from '@/api/KnowledgeApi';
+import _ from 'lodash';
 const { TabPane } = Tabs;
 const { Option } = Select;
 class Doc extends React.Component {
   state = {
-    activeKey: "view",
-    inputSize: "middle",
-    selectTag: "",
+    activeKey: 'view',
+    inputSize: 'middle',
+    selectTag: '',
     formData: {
-      content: "",
-      classify: "",
+      content: '',
+      classify: '',
     },
     classifyList: [],
   };
@@ -38,8 +38,8 @@ class Doc extends React.Component {
   };
   static defaultProps = {
     data: {
-      classify: "",
-      content: "",
+      classify: '',
+      content: '',
     },
     cb: () => {},
   };
@@ -56,12 +56,12 @@ class Doc extends React.Component {
       selfData.classify = [];
     }
     if (!selfData.content) {
-      selfData.content = "";
+      selfData.content = '';
     }
 
-    let activeKey = "edit";
+    let activeKey = 'edit';
     if (selfData.id) {
-      activeKey = "view";
+      activeKey = 'view';
     }
     this.setState({
       formData: selfData,
@@ -103,7 +103,7 @@ class Doc extends React.Component {
       (item) => item === this.state.selectTag
     );
     if (existObj) {
-      message.error("exist !");
+      message.error('exist !');
     } else {
       this.setState({
         formData: {
@@ -116,13 +116,13 @@ class Doc extends React.Component {
   createDoc = () => {
     const data = _.cloneDeep(this.state.formData);
     if (data.tag && data.tag.length > 0) {
-      data.tag = data.tag.join(",");
+      data.tag = data.tag.join(',');
     } else {
       delete data.tag;
     }
     API.createDoc(data).then((r) => {
-      if (r.code === "0") {
-        message.success(" SUCCESS ");
+      if (r.code === '0') {
+        message.success(' SUCCESS ');
         this.props.cb();
       } else {
         message.error(r.msg);
@@ -162,12 +162,12 @@ class Doc extends React.Component {
         </dl>
 
         <dl className="form_col">
-          <dd style={{ display: "flex" }}>
+          <dd style={{ display: 'flex' }}>
             <Select
               value={this.state.formData.classify}
               placeholder="Classify"
               onChange={(v) => {
-                this.createInputMode(v, "classify");
+                this.createInputMode(v, 'classify');
               }}
               style={{ width: 150, marginRight: 8 }}
             >
@@ -185,7 +185,7 @@ class Doc extends React.Component {
               value={this.state.formData.title}
               placeholder="Title ..."
               onChange={(e) => {
-                this.createInputMode(e.target.value, "title");
+                this.createInputMode(e.target.value, 'title');
               }}
             />
           </dd>
@@ -198,7 +198,7 @@ class Doc extends React.Component {
               value={this.state.formData.desc}
               placeholder="Description ..."
               onChange={(e) => {
-                this.createInputMode(e.target.value, "desc");
+                this.createInputMode(e.target.value, 'desc');
               }}
             />
           </dd>
@@ -225,7 +225,7 @@ class Doc extends React.Component {
                   value={this.state.formData.filePath}
                   placeholder="File Path ..."
                   onChange={(e) => {
-                    this.createInputMode(e.target.value, "filePath");
+                    this.createInputMode(e.target.value, 'filePath');
                   }}
                 />
               </dd>
@@ -234,7 +234,7 @@ class Doc extends React.Component {
         </Tabs>
 
         <Divider></Divider>
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: 'right' }}>
           <Button type="primary" onClick={this.createDoc}>
             Create Document
           </Button>

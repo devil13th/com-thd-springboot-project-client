@@ -1,17 +1,11 @@
-import React from 'react'
+import React from 'react';
 
 class MarkdownEditor extends React.Component {
-  state = {
-
-  }
+  state = {};
 
   render() {
-    return (
-      <div>
-1234
-      </div>
-    )
+    return <div>1234</div>;
   }
 }
 
-export default MarkdownEditor
+export default MarkdownEditor;
