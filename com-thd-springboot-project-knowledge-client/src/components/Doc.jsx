@@ -29,7 +29,7 @@ class Doc extends React.Component {
       content: "",
       classify: "",
     },
-    classifyList: []
+    classifyList: [],
   };
 
   static propTypes = {
@@ -41,16 +41,16 @@ class Doc extends React.Component {
       classify: "",
       content: "",
     },
-    cb: () => { },
+    cb: () => {},
   };
 
   componentDidMount() {
     console.log(this.props.data);
-    API.queryAllClassify().then(r => {
+    API.queryAllClassify().then((r) => {
       this.setState({
-        classifyList: r.result
-      })
-    })
+        classifyList: r.result,
+      });
+    });
     const selfData = _.cloneDeep(this.props.data);
     if (!selfData.classify) {
       selfData.classify = [];
@@ -93,9 +93,7 @@ class Doc extends React.Component {
     });
   };
   removeTag = (value) => {
-    let tag = this.state.formData.tag.filter(
-      (item) => !(value === item)
-    );
+    let tag = this.state.formData.tag.filter((item) => !(value === item));
     this.setState({
       formData: { ...this.state.formData, tag },
     });
@@ -110,10 +108,7 @@ class Doc extends React.Component {
       this.setState({
         formData: {
           ...this.state.formData,
-          tag: [
-            this.state.selectTag,
-            ...this.state.formData.tag,
-          ],
+          tag: [this.state.selectTag, ...this.state.formData.tag],
         },
       });
     }
@@ -151,7 +146,6 @@ class Doc extends React.Component {
 
         <dl className="form_col">
           <dd>
-
             {/* <Select
               size="small"
               value={this.state.formData.classify}
@@ -167,9 +161,8 @@ class Doc extends React.Component {
           </dd>
         </dl>
 
-
         <dl className="form_col">
-          <dd style={{ display: 'flex' }}>
+          <dd style={{ display: "flex" }}>
             <Select
               value={this.state.formData.classify}
               placeholder="Classify"
@@ -179,7 +172,11 @@ class Doc extends React.Component {
               style={{ width: 150, marginRight: 8 }}
             >
               {this.state.classifyList.map((item) => {
-                return <Option value={item.value} key={item.code}>{item.name}</Option>;
+                return (
+                  <Option value={item.value} key={item.code}>
+                    {item.name}
+                  </Option>
+                );
               })}
             </Select>
 
@@ -196,7 +193,6 @@ class Doc extends React.Component {
 
         <dl className="form_col">
           <dd>
-
             <Input
               size={this.state.inputSize}
               value={this.state.formData.desc}
@@ -236,8 +232,6 @@ class Doc extends React.Component {
             </dl>
           </TabPane>
         </Tabs>
-
-
 
         <Divider></Divider>
         <div style={{ textAlign: "right" }}>

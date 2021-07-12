@@ -1,27 +1,26 @@
-import axios from '@/axios';
+import axios from "@/axios";
 
-const context = process.env.REACT_APP_CONTEXT
+const context = process.env.REACT_APP_CONTEXT;
 export default {
-  createDocIndex:function(data){
+  createDocIndex: function (data) {
     return axios({
-      method: 'get',
-      url: `${context}/knowledge/createDocIndex`
+      method: "get",
+      url: `${context}/knowledge/createDocIndex`,
     });
   },
-  createDoc:function(vo){
+  createDoc: function (vo) {
     return axios({
-      method: 'post',
+      method: "post",
       url: `${context}/knowledge/createDoc`,
-      data:vo
-    });    
-  },
-  search:function(vo){
-    return axios({
-      method: 'post',
-      url: `${context}/knowledge/search`,
-      data:vo
+      data: vo,
     });
-    
+  },
+  search: function (vo) {
+    return axios({
+      method: "post",
+      url: `${context}/knowledge/search`,
+      data: vo,
+    });
   },
   // indexThdTecFile:function(){
   //   return axios({
@@ -29,74 +28,72 @@ export default {
   //     url: `${context}/knowledge/indexThdTecFile`
   //   });
   // },
-  createClassifyIndex:function(){
+  createClassifyIndex: function () {
     return axios({
-      method: 'get',
-      url: `${context}/knowledge/createClassifyIndex`
+      method: "get",
+      url: `${context}/knowledge/createClassifyIndex`,
     });
   },
-  createClassify:function(classify){
+  createClassify: function (classify) {
     return axios({
-      method: 'get',
-      url: `${context}/knowledge/createClassify/${classify}`
+      method: "get",
+      url: `${context}/knowledge/createClassify/${classify}`,
     });
   },
-  initClassifyData:function(){
+  initClassifyData: function () {
     return axios({
-      method: 'get',
-      url: `${context}/knowledge/initClassifyData`
+      method: "get",
+      url: `${context}/knowledge/initClassifyData`,
     });
   },
-  
-  createClassifyData:function(classify){
-    return axios({
-      method: 'post',
-      url: `${context}/knowledge/createClassifyData/${classify}`
-    });
-  },
-  queryAllClassify:function(){
-    return axios({
-      method: 'get',
-      url: `${context}/knowledge/queryAllClassify`
-    });
-  },
-  reIndexFolderByClassify:function(vo){
-    return axios({
-      method: 'post',
-      url: `${context}/knowledge/reIndexFolderByClassify`,
-      data:vo
-    });
-  },
-  deleteIndexThdTecDoc:function(){
-    return axios({
-      method: 'get',
-      url: `${context}/knowledge/deleteIndexThdTecDoc`
-    });
-  },
-  loadDocById:function(id){
-    return axios({
-      method: 'get',
-      url: `${context}/knowledge/loadDocById/${id}`
-    });
-  },
-  deleteDocIndex:function(){
-    return axios({
-      method: 'delete',
-      url: `${context}/knowledge/deleteDocIndex`
-    });
-  },
-  deleteDocByClassify:function(classify){
-    return axios({
-      method: 'delete',
-      url: `${context}/knowledge/deleteDocByClassify/${classify}`
-    });
-  },
-  deleteClassifyIndex:function(){
-    return axios({
-      method: 'delete',
-      url: `${context}/knowledge/deleteClassifyIndex`
-    });
-  },
-  
 
-}
+  createClassifyData: function (classify) {
+    return axios({
+      method: "post",
+      url: `${context}/knowledge/createClassifyData/${classify}`,
+    });
+  },
+  queryAllClassify: function () {
+    return axios({
+      method: "get",
+      url: `${context}/knowledge/queryAllClassify`,
+    });
+  },
+  reIndexFolderByClassify: function (vo) {
+    return axios({
+      method: "post",
+      url: `${context}/knowledge/reIndexFolderByClassify`,
+      data: vo,
+    });
+  },
+  deleteIndexThdTecDoc: function () {
+    return axios({
+      method: "get",
+      url: `${context}/knowledge/deleteIndexThdTecDoc`,
+    });
+  },
+  loadDocById: function (id) {
+    return axios({
+      method: "get",
+      url: `${context}/knowledge/loadDocById/${id}`,
+    });
+  },
+  deleteDocIndex: function () {
+    return axios({
+      method: "delete",
+      url: `${context}/knowledge/deleteDocIndex`,
+    });
+  },
+  deleteDocByClassify: function (classify) {
+    return axios({
+      method: "delete",
+      url: `${context}/knowledge/deleteDocByClassify/${classify}`,
+    });
+  },
+  deleteClassifyIndex: function () {
+    return axios({
+      method: "delete",
+      url: `${context}/knowledge/deleteClassifyIndex`,
+    });
+  },
+};

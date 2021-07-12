@@ -11,7 +11,7 @@ import {
   Empty,
   message,
   Slider,
-  Button
+  Button,
 } from "antd";
 import {
   DeleteOutlined,
@@ -28,7 +28,7 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import Doc from "./Doc.jsx";
-import IndexForm from './IndexForm'
+import IndexForm from "./IndexForm";
 import API from "@/api/KnowledgeApi";
 import CONSTANTS from "@/constants/Constants.js";
 
@@ -39,7 +39,6 @@ var imgUrl = require("@/assets/images/thdicon.png");
 var logoUrl = require("@/assets/images/logo.png");
 class Knowledge extends React.Component {
   state = {
-    
     keyWord: "",
     classify: "",
     dataList: [],
@@ -49,21 +48,20 @@ class Knowledge extends React.Component {
       content: "",
       classify: "",
     },
-    classifyList:[],
-    createClassifyModalVisible:false,
-    classifyName: '',
+    classifyList: [],
+    createClassifyModalVisible: false,
+    classifyName: "",
     pageSize: 10,
     indexFolerModalVisible: false,
-    deleteDataOfClassifyModalVisible:false,
-    deleteClassify:''
-    
+    deleteDataOfClassifyModalVisible: false,
+    deleteClassify: "",
   };
-  componentDidMount(){
-    API.queryAllClassify().then(r => {
+  componentDidMount() {
+    API.queryAllClassify().then((r) => {
       this.setState({
-        classifyList : r.result
-      })
-    })
+        classifyList: r.result,
+      });
+    });
   }
 
   onSearch = (keyWord) => {
@@ -72,7 +70,7 @@ class Knowledge extends React.Component {
       keyWords: keyWord,
       classify: this.state.classify,
       page: 0,
-      pageSize: this.state.pageSize
+      pageSize: this.state.pageSize,
     };
     API.search(searchVO).then((r) => {
       console.log(r);
@@ -132,7 +130,7 @@ class Knowledge extends React.Component {
   };
 
   deleteDocByClassify = () => {
-    if(this.state.deleteClassify){
+    if (this.state.deleteClassify) {
       API.deleteDocByClassify(this.state.deleteClassify).then(
         (r) => {
           message.success("Index Be Deleted Success");
@@ -141,15 +139,10 @@ class Knowledge extends React.Component {
           message.error(err.message);
         }
       );
-    }else{
-      message.error("Please Select A Classify")
+    } else {
+      message.error("Please Select A Classify");
     }
   };
-
-
-
-  
-
 
   indexThdTecFile = () => {
     API.indexThdTecFile().then((r) => {
@@ -172,13 +165,13 @@ class Knowledge extends React.Component {
     API.initClassifyData().then((r) => {
       message.success("SUCCESS");
     });
-  }
+  };
 
   createClassifyIndex = () => {
     API.createClassifyIndex().then((r) => {
       message.success("SUCCESS");
     });
-  }
+  };
   detail = (id) => {
     API.loadDocById(id).then((r) => {
       let rst = r.result;
@@ -194,65 +187,62 @@ class Knowledge extends React.Component {
 
   openCreateClassifyModal = () => {
     this.setState({
-      createClassifyModalVisible:true
-    })
-  }
+      createClassifyModalVisible: true,
+    });
+  };
 
   closeCreateClassifyModal = () => {
     this.setState({
-      createClassifyModalVisible:false
-    })
-  }
-
+      createClassifyModalVisible: false,
+    });
+  };
 
   openDeleteDataOfClassifyModal = () => {
     this.setState({
-      deleteDataOfClassifyModalVisible:true
-    })
-  }
+      deleteDataOfClassifyModalVisible: true,
+    });
+  };
 
   closeDeleteDataOfClassifyModal = () => {
     this.setState({
-      deleteDataOfClassifyModalVisible:false
-    })
-  }
+      deleteDataOfClassifyModalVisible: false,
+    });
+  };
 
-  
-
-  createClassify = () =>{
-    API.createClassify(this.state.classifyName).then(r => {
+  createClassify = () => {
+    API.createClassify(this.state.classifyName).then((r) => {
       message.success("Create Classify SUCCESS");
-      this.closeCreateClassifyModal()
-    })
-  }
+      this.closeCreateClassifyModal();
+    });
+  };
 
-  setClassifyName = (e) =>{
+  setClassifyName = (e) => {
     this.setState({
-      classifyName:e.target.value
-    })
-  }
+      classifyName: e.target.value,
+    });
+  };
 
   setPage = (v) => {
     this.setState({
-      pageSize:v
-    })
-  }
+      pageSize: v,
+    });
+  };
 
   sliderFormatter = (v) => {
-    return `查询数量：${v} 条`
-  }
+    return `查询数量：${v} 条`;
+  };
 
   openIndexFolerModal = () => {
     this.setState({
-      indexFolerModalVisible:true
-    })
-  }
+      indexFolerModalVisible: true,
+    });
+  };
 
   closeIndexFolderModal = () => {
     this.setState({
-      indexFolerModalVisible:false
-    })
-  }
+      indexFolerModalVisible: false,
+    });
+  };
 
   render() {
     console.log("================", imgUrl);
@@ -265,7 +255,7 @@ class Knowledge extends React.Component {
           <Select
             style={{ width: 150 }}
             allowClear={true}
-            placeholder={'ALL'}
+            placeholder={"ALL"}
             value={this.state.classify}
             onChange={(v) => {
               this.setState({ classify: v });
@@ -299,7 +289,14 @@ class Knowledge extends React.Component {
             placeholder="input search text"
           />
         </Input.Group>
-        <Slider tipFormatter={ this.sliderFormatter } max={100} min={0} step={5} value={this.state.pageSize} onChange={this.setPage}/>
+        <Slider
+          tipFormatter={this.sliderFormatter}
+          max={100}
+          min={0}
+          step={5}
+          value={this.state.pageSize}
+          onChange={this.setPage}
+        />
       </div>
     );
 
@@ -373,14 +370,20 @@ class Knowledge extends React.Component {
                   {/* <Menu.Item key="setting:5" icon={<PlusOutlined />}>
                     Create New Doc
                   </Menu.Item> */}
-                  <Menu.ItemGroup title={ <div><HddOutlined /> Index Folder </div>}>
+                  <Menu.ItemGroup
+                    title={
+                      <div>
+                        <HddOutlined /> Index Folder{" "}
+                      </div>
+                    }
+                  >
                     <Menu.Item
                       key="setting:2"
                       icon={<UndoOutlined />}
                       onClick={this.openIndexFolerModal}
                     >
                       <Tooltip title="Index All File Of Folder To Classify Which You Selected">
-                      Index Foler
+                        Index Foler
                       </Tooltip>
                     </Menu.Item>
                     {/* <Menu.Item
@@ -397,22 +400,27 @@ class Knowledge extends React.Component {
                       onClick={this.openDeleteDataOfClassifyModal}
                     >
                       <Tooltip title="Remove All Doc Of Classify Which You Selected">
-                      Remove All Doc For Classify
+                        Remove All Doc For Classify
                       </Tooltip>
                     </Menu.Item>
                   </Menu.ItemGroup>
-                  <Menu.ItemGroup title={ <div><HddOutlined /> Classify Management</div>}>
+                  <Menu.ItemGroup
+                    title={
+                      <div>
+                        <HddOutlined /> Classify Management
+                      </div>
+                    }
+                  >
                     <Menu.Item
                       key="setting:createClassifyIndex"
-                      icon={<DeploymentUnitOutlined style={{color:'red'}}/>}
+                      icon={<DeploymentUnitOutlined style={{ color: "red" }} />}
                       onClick={this.createClassifyIndex}
                     >
                       Create Classify Index
                     </Menu.Item>
                     <Menu.Item
                       key="setting:initClassifyData"
-                      icon={<UndoOutlined style={{color:'red'}}/>}
-                    
+                      icon={<UndoOutlined style={{ color: "red" }} />}
                     >
                       <Popconfirm
                         title="Are you sure to initalize classify dic data ?"
@@ -420,18 +428,16 @@ class Knowledge extends React.Component {
                         okText="Yes"
                         cancelText="No"
                       >
-                      Init Classify Date
-                      </Popconfirm>       
+                        Init Classify Date
+                      </Popconfirm>
                     </Menu.Item>
-
 
                     <Menu.Item
                       key="setting:deleteClassifyIndex"
-                      icon={<DeleteOutlined style={{color:'red'}}/>}
+                      icon={<DeleteOutlined style={{ color: "red" }} />}
                     >
-                        Delete Classify Index
+                      Delete Classify Index
                     </Menu.Item>
-
 
                     <Menu.Item
                       key="setting:createClassify"
@@ -441,22 +447,27 @@ class Knowledge extends React.Component {
                       Create New Classify
                     </Menu.Item>
                   </Menu.ItemGroup>
-                    
-                  <Menu.ItemGroup title={ <div><HddOutlined /> Management</div>}>
 
+                  <Menu.ItemGroup
+                    title={
+                      <div>
+                        <HddOutlined /> Management
+                      </div>
+                    }
+                  >
                     {/* <Menu.Item key="setting:4" icon={<HddOutlined />}>
                       Document
                     </Menu.Item> */}
                     <Menu.Item
                       key="setting:createDocIndex"
-                      icon={<DeploymentUnitOutlined style={{color:'red'}}/>}
+                      icon={<DeploymentUnitOutlined style={{ color: "red" }} />}
                       onClick={this.createDocIndex}
                     >
                       Create Index
                     </Menu.Item>
                     <Menu.Item
                       key="setting:deleteDocIndex"
-                      icon={<DeleteOutlined style={{color:'red'}}/>}
+                      icon={<DeleteOutlined style={{ color: "red" }} />}
                     >
                       <Popconfirm
                         title="Are you sure to delete index ?"
@@ -505,7 +516,6 @@ class Knowledge extends React.Component {
           <Doc data={this.state.data} cb={this.closeDocVisible}></Doc>
         </Modal>
 
-
         <Modal
           title="Create Classify"
           visible={this.state.createClassifyModalVisible}
@@ -516,12 +526,13 @@ class Knowledge extends React.Component {
           onOk={this.createClassify}
           maskClosable={false}
           okText={`Create`}
-        >   
-          Classify : <Input value={this.state.classifyName} onChange={this.setClassifyName}/>
-
-
+        >
+          Classify :{" "}
+          <Input
+            value={this.state.classifyName}
+            onChange={this.setClassifyName}
+          />
         </Modal>
-
 
         <Modal
           title="Delete All Date for Classify "
@@ -531,22 +542,21 @@ class Knowledge extends React.Component {
           destroyOnClose={true}
           onCancel={this.closeDeleteDataOfClassifyModal}
           okButtonProps={{
-            danger:true
+            danger: true,
           }}
           onOk={this.deleteDocByClassify}
           maskClosable={false}
           okText="Delete All Date for Classify"
-        >   
-          Classify： 
+        >
+          Classify：
           <Select
             style={{ width: 250 }}
             allowClear={true}
-            placeholder={'Please Select A Classify'}
+            placeholder={"Please Select A Classify"}
             value={this.state.deleteClassify}
             onChange={(v) => {
               this.setState({ deleteClassify: v });
             }}
-            
           >
             {this.state.classifyList.map((item) => {
               return (
@@ -556,10 +566,8 @@ class Knowledge extends React.Component {
               );
             })}
           </Select>
-
-
         </Modal>
-        
+
         <Modal
           title="Index Folder"
           visible={this.state.indexFolerModalVisible}
@@ -571,13 +579,13 @@ class Knowledge extends React.Component {
           okText={`Index`}
           onCancel={this.closeIndexFolderModal}
         >
-         <IndexForm
-          okFn={this.closeIndexFolderModal}
-          cancelFn={this.closeIndexFolderModal}
-         > </IndexForm>
-
+          <IndexForm
+            okFn={this.closeIndexFolderModal}
+            cancelFn={this.closeIndexFolderModal}
+          >
+            {" "}
+          </IndexForm>
         </Modal>
-        
       </div>
     );
   }
